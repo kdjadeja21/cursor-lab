@@ -355,8 +355,11 @@ const ActionsContext = createContext<AgentActions | null>(null);
 export function AgentProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const stateRef = useRef(state);
-  stateRef.current = state;
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     try {
