@@ -58,7 +58,7 @@ export function Sidebar({
                 <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-zinc-500">
                   <span>{MODE_META[chat.mode].label}</span>
                   <span className="text-zinc-700">·</span>
-                  <span>{relativeTime(chat.updatedAt)}</span>
+                  <span suppressHydrationWarning>{relativeTime(chat.updatedAt)}</span>
                 </p>
               </button>
             )

@@ -26,6 +26,48 @@ export function CursorMark({
   )
 }
 
+export function CursorCubeSvg({ className }: { className?: string }) {
+  const gid = useId()
+  return (
+    <svg viewBox="0 0 120 132" className={cn("overflow-visible", className)} aria-hidden>
+      <defs>
+        <linearGradient id={`${gid}-top`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f4f4f5" />
+          <stop offset="100%" stopColor="#71717a" />
+        </linearGradient>
+        <linearGradient id={`${gid}-left`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#3f3f46" />
+          <stop offset="100%" stopColor="#18181b" />
+        </linearGradient>
+        <linearGradient id={`${gid}-right`} x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#27272a" />
+          <stop offset="100%" stopColor="#09090b" />
+        </linearGradient>
+        <filter id={`${gid}-shadow`} x="-20%" y="-10%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="10" stdDeviation="8" floodColor="#000" floodOpacity="0.45" />
+        </filter>
+      </defs>
+      <g filter={`url(#${gid}-shadow)`}>
+        <path d="M60 8 L112 38 L60 68 L8 38 Z" fill={`url(#${gid}-top)`} />
+        <path d="M8 38 L60 68 L60 124 L8 94 Z" fill={`url(#${gid}-left)`} />
+        <path d="M60 68 L112 38 L112 94 L60 124 Z" fill={`url(#${gid}-right)`} />
+        <path
+          d="M60 8 L112 38 L60 68 L8 38 Z"
+          fill="none"
+          stroke="rgba(255,255,255,0.22)"
+          strokeWidth="0.8"
+        />
+        <g transform="translate(74 56)">
+          <path
+            fill="#fff"
+            d="M0 1.2 0 31.4 8.6 23.6 14.2 37.2 18.8 35.2 13.4 21.8 24.2 21.8Z"
+          />
+        </g>
+      </g>
+    </svg>
+  )
+}
+
 export type CubeMotion = "idle" | "think" | "stream" | "charge"
 
 export function CursorLogo({
@@ -42,8 +84,7 @@ export function CursorLogo({
   className?: string
 }) {
   const renderCube = form === "cube" || (form === "auto" && size >= 28)
-  const rings =
-    size < 40 ? 0 : Math.min(size >= 72 ? 5 : 3, Math.max(0, intensity))
+  const rings = size < 44 ? 0 : Math.min(size >= 72 ? 4 : 2, Math.max(0, intensity))
 
   if (!renderCube) {
     return (
@@ -68,24 +109,13 @@ export function CursorLogo({
           className="cursor-orbit"
           style={{
             animationDelay: `${index * 0.18}s`,
-            inset: `${-6 - index * 5}px`,
-            opacity: 0.22 + index * 0.08,
+            inset: `${-8 - index * 7}px`,
+            opacity: 0.2 + index * 0.1,
           }}
         />
       ))}
       <span className="cursor-glow" />
-      <span className="cursor-scene">
-        <span className="cursor-cube">
-          <span className="cursor-face front">
-            <CursorMark className="size-[58%] text-white" />
-          </span>
-          <span className="cursor-face back" />
-          <span className="cursor-face right" />
-          <span className="cursor-face left" />
-          <span className="cursor-face top" />
-          <span className="cursor-face bottom" />
-        </span>
-      </span>
+      <CursorCubeSvg className="cursor-iso" />
     </span>
   )
 }

@@ -169,15 +169,26 @@
   justify-content: center;
   width: var(--cube, 48px);
   height: var(--cube, 48px);
+  overflow: visible;
+}
+
+.cursor-iso {
+  position: relative;
+  z-index: 1;
+  width: 86%;
+  height: 86%;
+  transform-origin: 50% 58%;
 }
 
 .cursor-glow {
   position: absolute;
-  inset: 16%;
+  inset: 12%;
+  border: 0;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.28), transparent 68%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.32), transparent 68%);
   filter: blur(10px);
-  opacity: 0.45;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .cursor-orbit {
@@ -187,64 +198,7 @@
   pointer-events: none;
 }
 
-.cursor-scene {
-  --face: calc(var(--cube) * 0.58);
-  position: relative;
-  z-index: 1;
-  width: var(--face);
-  height: var(--face);
-  perspective: calc(var(--cube) * 4.2);
-}
-
-.cursor-cube {
-  width: var(--face);
-  height: var(--face);
-  position: relative;
-  transform-style: preserve-3d;
-  transform: rotateX(-26deg) rotateY(40deg);
-}
-
-.cursor-face {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--face);
-  height: var(--face);
-  display: grid;
-  place-items: center;
-}
-
-.cursor-face.front {
-  transform: translateZ(calc(var(--face) / 2));
-  background: linear-gradient(160deg, #3f3f46 0%, #09090b 72%);
-}
-
-.cursor-face.back {
-  transform: rotateY(180deg) translateZ(calc(var(--face) / 2));
-  background: #111113;
-}
-
-.cursor-face.right {
-  transform: rotateY(90deg) translateZ(calc(var(--face) / 2));
-  background: linear-gradient(180deg, #71717a, #18181b);
-}
-
-.cursor-face.left {
-  transform: rotateY(-90deg) translateZ(calc(var(--face) / 2));
-  background: linear-gradient(180deg, #27272a, #09090b);
-}
-
-.cursor-face.top {
-  transform: rotateX(90deg) translateZ(calc(var(--face) / 2));
-  background: linear-gradient(135deg, #d4d4d8, #3f3f46);
-}
-
-.cursor-face.bottom {
-  transform: rotateX(-90deg) translateZ(calc(var(--face) / 2));
-  background: #050505;
-}
-
-.cursor-logo.is-idle .cursor-cube {
+.cursor-logo.is-idle .cursor-iso {
   animation: cube-idle 5.6s ease-in-out infinite;
 }
 
@@ -254,16 +208,16 @@
   animation: orbit-spin 7s linear infinite;
 }
 
-.cursor-logo.is-think .cursor-cube,
-.cursor-logo.is-charge .cursor-cube {
-  animation: cube-think 2.6s linear infinite;
+.cursor-logo.is-think .cursor-iso,
+.cursor-logo.is-charge .cursor-iso {
+  animation: cube-think 2.8s linear infinite;
 }
 
-.cursor-logo.is-charge .cursor-cube {
+.cursor-logo.is-charge .cursor-iso {
   animation-duration: 0.95s;
 }
 
-.cursor-logo.is-stream .cursor-cube {
+.cursor-logo.is-stream .cursor-iso {
   animation: cube-stream 1.05s ease-in-out infinite;
 }
 
@@ -296,29 +250,29 @@
 @keyframes cube-idle {
   0%,
   100% {
-    transform: rotateX(-26deg) rotateY(40deg) translateY(0);
+    transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform: rotateX(-18deg) rotateY(50deg) translateY(-7%);
+    transform: translateY(-8%) rotate(6deg);
   }
 }
 
 @keyframes cube-think {
   from {
-    transform: rotateX(-26deg) rotateY(40deg);
+    transform: rotate(0deg);
   }
   to {
-    transform: rotateX(-26deg) rotateY(400deg);
+    transform: rotate(360deg);
   }
 }
 
 @keyframes cube-stream {
   0%,
   100% {
-    transform: rotateX(-26deg) rotateY(40deg) scale(1);
+    transform: rotate(-8deg) scale(1);
   }
   50% {
-    transform: rotateX(-20deg) rotateY(58deg) scale(1.06);
+    transform: rotate(10deg) scale(1.08);
   }
 }
 
@@ -363,7 +317,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cursor-cube,
+  .cursor-iso,
   .cursor-orbit,
   .cursor-glow,
   .composer-card.is-running::after,

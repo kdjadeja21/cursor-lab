@@ -58,7 +58,7 @@ export function ModelPicker({
       <PopoverContent align="start" className="w-80 gap-0 p-0">
         <Command>
           <CommandInput placeholder="Search models…" />
-          <CommandList>
+          <CommandList className="max-h-96">
             <CommandEmpty>No model matches.</CommandEmpty>
             {MODEL_GROUPS.map((group) => (
               <CommandGroup key={group.provider} heading={group.label}>
