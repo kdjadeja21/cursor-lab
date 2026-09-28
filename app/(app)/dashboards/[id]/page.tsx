@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { use } from "react";
-import { Loader2, Pencil, RefreshCw } from "lucide-react";
+import { Clock, Layers, Loader2, Pencil, Plug, Plus, RefreshCw } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { WidgetFrame } from "@/components/widgets/widget-frame";
@@ -42,45 +44,61 @@ export default function DashboardViewerPage({
       .at(-1) ?? null;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">{dashboard.name}</h1>
-          {dashboard.description ? (
-            <p className="mt-1 text-sm text-ink-muted">{dashboard.description}</p>
-          ) : null}
-          <p
-            className="mt-1 text-xs text-ink-subtle"
-            title={formatAbsoluteTime(lastUpdated)}
-          >
-            Data updated {formatRelativeTime(lastUpdated)} ·{" "}
-            {connections.length} source{connections.length === 1 ? "" : "s"}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => void refreshMany(connectionIds)}
-            disabled={refreshing || connectionIds.length === 0}
-          >
-            {refreshing ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-            ) : (
-              <RefreshCw className="size-4" aria-hidden />
-            )}
-            Refresh all
-          </Button>
-          <Link
-            href={`/dashboards/${id}/edit`}
-            className={buttonClasses({ variant: "primary" })}
-          >
-            <Pencil className="size-4" aria-hidden />
-            Edit
-          </Link>
-        </div>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        back={{ href: "/", label: "Dashboards" }}
+        title={dashboard.name}
+        description={dashboard.description || undefined}
+        meta={
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge
+              tone={refreshing ? "brand" : "neutral"}
+              dot
+              pulse={refreshing}
+              className="gap-1.5"
+            >
+              <Clock className="size-3" aria-hidden />
+              <span title={formatAbsoluteTime(lastUpdated)}>
+                Updated {formatRelativeTime(lastUpdated)}
+              </span>
+            </Badge>
+            <Badge>
+              <Layers className="size-3" aria-hidden />
+              {widgets.length} widget{widgets.length === 1 ? "" : "s"}
+            </Badge>
+            <Badge>
+              <Plug className="size-3" aria-hidden />
+              {connections.length} source{connections.length === 1 ? "" : "s"}
+            </Badge>
+          </div>
+        }
+        actions={
+          <>
+            <Button
+              onClick={() => void refreshMany(connectionIds)}
+              disabled={refreshing || connectionIds.length === 0}
+            >
+              {refreshing ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <RefreshCw className="size-4" aria-hidden />
+              )}
+              Refresh all
+            </Button>
+            <Link
+              href={`/dashboards/${id}/edit`}
+              className={buttonClasses({ variant: "primary" })}
+            >
+              <Pencil className="size-4" aria-hidden />
+              Edit
+            </Link>
+          </>
+        }
+      />
 
       {widgets.length === 0 ? (
         <EmptyState
+          icon={<Layers className="size-5" aria-hidden />}
           title="This dashboard is empty"
           description="Add a widget to start showing data from one of your API connections."
           action={
@@ -88,6 +106,7 @@ export default function DashboardViewerPage({
               href={`/dashboards/${id}/widgets/new`}
               className={buttonClasses({ variant: "primary" })}
             >
+              <Plus className="size-4" aria-hidden />
               Add widget
             </Link>
           }

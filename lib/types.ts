@@ -26,7 +26,9 @@ export type FormatKind =
   | "number"
   | "currency"
   | "percent"
-  | "date";
+  | "date"
+  | "image"
+  | "link";
 
 export interface FieldFormat {
   kind: FormatKind;
@@ -83,6 +85,10 @@ export interface CardsConfig {
   /** Object path for a single card, or array path for one card per item. */
   sourcePath: FieldPath;
   fields: FieldMapping[];
+  /** Image shown at the top of each card, when the response contains one. */
+  imagePath: FieldPath | null;
+  /** Field promoted to the card heading. */
+  titlePath: FieldPath | null;
   maxCards: number;
 }
 

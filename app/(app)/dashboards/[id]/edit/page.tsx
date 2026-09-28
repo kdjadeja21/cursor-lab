@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { use, useState } from "react";
 import {
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -14,6 +13,7 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -74,48 +74,44 @@ export default function DashboardEditorPage({
   const refreshing = connectionIds.some((connectionId) => pending[connectionId]);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink"
-          >
-            <ArrowLeft className="size-3.5" aria-hidden />
-            Dashboards
-          </Link>
-          <h1 className="mt-2 text-xl font-semibold">Edit {dashboard.name}</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => void refreshMany(connectionIds)}
-            disabled={refreshing || connectionIds.length === 0}
-          >
-            {refreshing ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-            ) : (
-              <RefreshCw className="size-4" aria-hidden />
-            )}
-            Refresh all
-          </Button>
-          <Link href={`/dashboards/${id}`} className={buttonClasses()}>
-            <Eye className="size-4" aria-hidden />
-            Preview
-          </Link>
-          <Link
-            href={`/dashboards/${id}/widgets/new`}
-            className={buttonClasses({ variant: "primary" })}
-          >
-            <Plus className="size-4" aria-hidden />
-            Add widget
-          </Link>
-        </div>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        back={{ href: "/", label: "Dashboards" }}
+        title={`Edit ${dashboard.name}`}
+        description="Arrange widgets on the four-column grid and set how each source refreshes."
+        actions={
+          <>
+            <Button
+              onClick={() => void refreshMany(connectionIds)}
+              disabled={refreshing || connectionIds.length === 0}
+            >
+              {refreshing ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <RefreshCw className="size-4" aria-hidden />
+              )}
+              Refresh all
+            </Button>
+            <Link href={`/dashboards/${id}`} className={buttonClasses()}>
+              <Eye className="size-4" aria-hidden />
+              Preview
+            </Link>
+            <Link
+              href={`/dashboards/${id}/widgets/new`}
+              className={buttonClasses({ variant: "primary" })}
+            >
+              <Plus className="size-4" aria-hidden />
+              Add widget
+            </Link>
+          </>
+        }
+      />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="flex flex-col gap-4">
           {widgets.length === 0 ? (
             <EmptyState
+              icon={<Plus className="size-5" aria-hidden />}
               title="No widgets yet"
               description="Add a widget from one of your API connections to start building this dashboard."
               action={
@@ -167,7 +163,7 @@ export default function DashboardEditorPage({
                             width: Number(event.target.value) as Widget["width"],
                           })
                         }
-                        className="rounded border border-line-strong bg-surface px-1 py-0.5 text-[11px]"
+                        className="rounded-md border border-line-strong bg-surface px-1 py-0.5 text-[11px] text-ink-muted"
                       >
                         {([1, 2, 3, 4] as Widget["width"][]).map((value) => (
                           <option key={value} value={value}>
@@ -183,7 +179,7 @@ export default function DashboardEditorPage({
                             height: event.target.value as Widget["height"],
                           })
                         }
-                        className="rounded border border-line-strong bg-surface px-1 py-0.5 text-[11px]"
+                        className="rounded-md border border-line-strong bg-surface px-1 py-0.5 text-[11px] text-ink-muted"
                       >
                         <option value="sm">S</option>
                         <option value="md">M</option>
@@ -233,9 +229,12 @@ export default function DashboardEditorPage({
           )}
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 lg:order-2">
           <Card>
-            <CardHeader title="Dashboard" />
+            <CardHeader
+              icon={<Pencil className="size-3.5" aria-hidden />}
+              title="Dashboard"
+            />
             <div className="flex flex-col gap-3 p-4">
               <TextField
                 label="Name"
@@ -261,6 +260,7 @@ export default function DashboardEditorPage({
 
           <Card>
             <CardHeader
+              icon={<RefreshCw className="size-3.5" aria-hidden />}
               title="Refresh behaviour"
               description="Each connection keeps its own schedule and is fetched once per interval, however many widgets use it."
             />

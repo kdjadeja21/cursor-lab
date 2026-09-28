@@ -1,5 +1,10 @@
 import { toNumber } from "./format.ts";
-import { getByPath, isPlainObject, pathLabel } from "./infer-schema.ts";
+import {
+  getByPath,
+  isPlainObject,
+  looksLikeImageUrl,
+  pathLabel,
+} from "./infer-schema.ts";
 import type {
   CardsConfig,
   ChartConfig,
@@ -118,6 +123,8 @@ export function resolveKpi(
 }
 
 export interface CardRecord {
+  imageUrl: string | null;
+  title: string | null;
   fields: { mapping: FieldMapping; value: unknown }[];
 }
 
@@ -150,16 +157,29 @@ export function resolveCards(
 
   // Absolute paths are used when the source is the response root itself.
   const relative = Array.isArray(source) || config.sourcePath.length > 0;
+  const read = (record: Record<string, unknown>, path: string[]) =>
+    relative ? getByPath(record, path) : getByPath(data, path);
 
   return {
-    value: records.map((record) => ({
-      fields: config.fields.map((mapping) => ({
-        mapping,
-        value: relative
-          ? getByPath(record, mapping.path)
-          : getByPath(data, mapping.path),
-      })),
-    })),
+    value: records.map((record) => {
+      const imageValue = config.imagePath
+        ? read(record, config.imagePath)
+        : undefined;
+      const titleValue = config.titlePath
+        ? read(record, config.titlePath)
+        : undefined;
+      return {
+        imageUrl: looksLikeImageUrl(imageValue) ? String(imageValue) : null,
+        title:
+          titleValue === undefined || titleValue === null
+            ? null
+            : String(titleValue),
+        fields: config.fields.map((mapping) => ({
+          mapping,
+          value: read(record, mapping.path),
+        })),
+      };
+    }),
     missing: relative ? findMissing(records, config.fields) : [],
     error: null,
   };

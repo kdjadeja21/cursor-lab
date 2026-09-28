@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { use } from "react";
-import { ArrowLeft } from "lucide-react";
 import { ConnectionEditor } from "@/components/connection-editor";
-import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/page-header";
+import { MethodBadge } from "@/components/ui/badge";
 import { buttonClasses } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useWorkspace } from "@/lib/store/workspace";
 
 export default function EditConnectionPage({
@@ -30,19 +31,23 @@ export default function EditConnectionPage({
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <Link
-          href="/connections"
-          className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden />
-          Connections
-        </Link>
-        <h1 className="mt-2 text-xl font-semibold">{connection.name}</h1>
-        <p className="mt-1 font-mono text-xs text-ink-subtle">{connection.url}</p>
-      </div>
-
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        back={{ href: "/connections", label: "Connections" }}
+        title={connection.name}
+        meta={
+          <span className="flex items-center gap-2">
+            <MethodBadge
+              method={
+                connection.apiType === "graphql" ? "POST" : connection.method
+              }
+            />
+            <span className="truncate font-mono text-xs text-ink-subtle">
+              {connection.url}
+            </span>
+          </span>
+        }
+      />
       <ConnectionEditor
         key={connection.id}
         initialConnection={connection}

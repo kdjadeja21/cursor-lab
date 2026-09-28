@@ -2,11 +2,41 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Zap } from "lucide-react";
+import {
+  BarChart3,
+  Check,
+  Layers,
+  RefreshCw,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TextField } from "@/components/ui/field";
 import { useWorkspace } from "@/lib/store/workspace";
+
+const HIGHLIGHTS = [
+  {
+    icon: Layers,
+    title: "REST and GraphQL in one place",
+    body: "Configure the request, test it, and inspect exactly what comes back.",
+  },
+  {
+    icon: BarChart3,
+    title: "Views suggested from your data",
+    body: "Tables, KPI cards, galleries, and charts ranked by what the response actually contains.",
+  },
+  {
+    icon: RefreshCw,
+    title: "Kept in sync",
+    body: "Each endpoint refreshes on its own schedule and every widget shares the same fetch.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Requests run server-side",
+    body: "The browser never calls your endpoints directly, so cross-origin APIs just work.",
+  },
+];
 
 export default function SignInPage() {
   const { ready, session, signIn } = useWorkspace();
@@ -31,48 +61,97 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
-          <span className="mx-auto mb-3 grid size-10 place-items-center rounded-xl bg-brand text-white">
-            <Zap className="size-5" aria-hidden />
-          </span>
-          <h1 className="text-xl font-semibold">Fetchboard</h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            Connect APIs. Build your dashboard.
-          </p>
+    <div className="flex flex-1 items-center justify-center px-4 py-10 sm:py-16">
+      <div className="grid w-full max-w-5xl items-center gap-10 lg:grid-cols-[1.1fr_minmax(0,24rem)]">
+        <section className="hidden flex-col gap-8 lg:flex">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-brand-strong shadow-xs">
+              <Zap className="size-3.5" aria-hidden />
+              Fetchboard
+            </span>
+            <h1 className="mt-5 text-4xl leading-[1.08] font-semibold">
+              Connect APIs.
+              <br />
+              Build your dashboard.
+            </h1>
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-ink-muted">
+              Add the endpoints you already use, pick the visualizations that fit
+              what they return, and combine them into one dashboard that keeps
+              itself up to date. No frontend code.
+            </p>
+          </div>
+
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {HIGHLIGHTS.map(({ icon: Icon, title, body }) => (
+              <li key={title} className="flex gap-3">
+                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl border border-line bg-surface text-brand-strong shadow-xs">
+                  <Icon className="size-4" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-sm font-medium">{title}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-ink-muted">
+                    {body}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div className="w-full">
+          <div className="mb-6 flex flex-col items-center gap-2 text-center lg:hidden">
+            <span className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-brand to-accent text-white shadow-card">
+              <Zap className="size-5" aria-hidden />
+            </span>
+            <h1 className="text-2xl font-semibold">Fetchboard</h1>
+            <p className="text-sm text-ink-muted">
+              Connect APIs. Build your dashboard.
+            </p>
+          </div>
+
+          <Card className="p-6">
+            <h2 className="text-base font-semibold">Open your workspace</h2>
+            <p className="mt-1 text-xs leading-relaxed text-ink-muted">
+              Your email names the workspace saved in this browser. No password,
+              no account.
+            </p>
+
+            <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-4">
+              <TextField
+                label="Email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setError(null);
+                }}
+              />
+              <TextField
+                label="Display name (optional)"
+                placeholder="Alex Doe"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+              {error ? (
+                <p role="alert" className="text-xs text-danger">
+                  {error}
+                </p>
+              ) : null}
+              <Button type="submit" variant="primary" size="lg" className="w-full">
+                Continue
+                <Check className="size-4" aria-hidden />
+              </Button>
+            </form>
+
+            <p className="mt-4 border-t border-line pt-4 text-[11px] leading-relaxed text-ink-subtle">
+              Placeholder sign-in: dashboards, connections, and credentials are
+              stored in this browser only, and scheduled refresh runs while a tab
+              is open.
+            </p>
+          </Card>
         </div>
-
-        <Card className="p-5">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <TextField
-              label="Email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-                setError(null);
-              }}
-            />
-            <TextField
-              label="Display name (optional)"
-              placeholder="Alex Doe"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-            />
-            {error ? <p className="text-xs text-danger">{error}</p> : null}
-            <Button type="submit" variant="primary" className="w-full">
-              Continue
-            </Button>
-          </form>
-        </Card>
-
-        <p className="mt-4 text-center text-xs text-ink-subtle">
-          Placeholder sign-in. There is no account system yet — your dashboards
-          and connections are stored in this browser only.
-        </p>
       </div>
     </div>
   );

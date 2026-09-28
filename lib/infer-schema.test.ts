@@ -7,6 +7,8 @@ import {
   inferSchema,
   kindOf,
   looksLikeDate,
+  looksLikeImageUrl,
+  looksLikeUrl,
   summariseRows,
 } from "./infer-schema.ts";
 
@@ -44,6 +46,66 @@ test("recognises date-like strings without matching arbitrary text", () => {
   assert.equal(looksLikeDate("ORD-1001"), false);
   assert.equal(looksLikeDate("12"), false);
   assert.equal(looksLikeDate("2026-13-45"), false);
+});
+
+test("recognises image URLs by extension and by known image hosts", () => {
+  const images = [
+    "https://cdn.example.com/products/desk.jpg",
+    "http://example.com/a/b/photo.PNG?width=200",
+    "https://example.com/image.webp#hash",
+    "https://images.example.com/abcdef",
+    "https://picsum.photos/seed/desk/400/300",
+    "https://example.com/avatars/42",
+    "https://api.dicebear.com/9.x/shapes/svg?seed=ada",
+  ];
+  for (const value of images) {
+    assert.ok(looksLikeImageUrl(value), `${value} should be detected as an image`);
+  }
+
+  const notImages = [
+    "https://api.example.com/orders",
+    "https://example.com/report.pdf",
+    "ORD-1001",
+    "/local/photo.jpg",
+    "ftp://example.com/photo.jpg",
+    "",
+    42,
+    null,
+  ];
+  for (const value of notImages) {
+    assert.equal(
+      looksLikeImageUrl(value),
+      false,
+      `${String(value)} should not be detected as an image`,
+    );
+  }
+});
+
+test("classifies image and link strings as their own kinds", () => {
+  assert.equal(kindOf("https://cdn.example.com/a.png"), "image");
+  assert.equal(kindOf("https://api.example.com/orders"), "url");
+  assert.equal(kindOf("just text"), "string");
+  assert.ok(looksLikeUrl("https://example.com"));
+  assert.equal(looksLikeUrl("example.com"), false);
+});
+
+test("image fields surface as row columns and as scalar candidates", () => {
+  const summaries = summariseRows([
+    { name: "Desk", photo: "https://cdn.example.com/desk.jpg" },
+    { name: "Chair", photo: "https://cdn.example.com/chair.jpg" },
+  ]);
+  assert.equal(summaries.find((field) => field.label === "photo")?.kind, "image");
+
+  const scalars = findScalars(
+    inferSchema({ logo: "https://cdn.example.com/logo.svg", name: "Acme" }),
+  );
+  assert.deepEqual(
+    scalars.map((scalar) => [scalar.label, scalar.kind]),
+    [
+      ["logo", "image"],
+      ["name", "string"],
+    ],
+  );
 });
 
 test("infers the PRD example into nested nodes and a tabular array", () => {

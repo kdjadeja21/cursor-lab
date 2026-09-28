@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { inferSchema } from "./infer-schema.ts";
 import { emptyConfigFor, recommendVisualizations } from "./recommend.ts";
-import type { ChartConfig, KpiConfig, TableConfig } from "./types.ts";
+import type {
+  CardsConfig,
+  ChartConfig,
+  KpiConfig,
+  TableConfig,
+} from "./types.ts";
 
 const PRD_EXAMPLE = {
   summary: { totalOrders: 1250, revenue: 85400, currency: "USD" },
@@ -110,6 +115,78 @@ test("high-cardinality categories do not produce a bar chart", () => {
     false,
   );
   assert.ok(results.some((result) => result.kind === "table"));
+});
+
+test("a response carrying image URLs leads with an image card view", () => {
+  const results = recommend({
+    products: [
+      {
+        sku: "MN-27",
+        name: "Monitor",
+        image: "https://cdn.example.com/monitor.jpg",
+        price: 329,
+        category: "Displays",
+      },
+      {
+        sku: "KB-01",
+        name: "Keyboard",
+        image: "https://cdn.example.com/keyboard.jpg",
+        price: 89,
+        category: "Peripherals",
+      },
+    ],
+  });
+
+  const top = results[0];
+  assert.equal(top.kind, "cards", "the gallery outranks the table and charts");
+  assert.match(top.title, /gallery/i);
+  assert.match(top.reason, /image/i);
+
+  const config = top.config as CardsConfig;
+  assert.deepEqual(config.imagePath, ["image"]);
+  assert.deepEqual(config.titlePath, ["name"]);
+  assert.ok(
+    !config.fields.some((field) => field.path[0] === "image"),
+    "the image is the card header, not a text row",
+  );
+  assert.ok(
+    !config.fields.some((field) => field.path[0] === "name"),
+    "the title is the card heading, not a repeated row",
+  );
+  assert.deepEqual(
+    config.fields.map((field) => field.path[0]),
+    ["sku", "price", "category"],
+  );
+});
+
+test("a table including an image column formats it as an image", () => {
+  const table = recommend({
+    rows: [{ label: "a", thumb: "https://cdn.example.com/a.png", total: 1 }],
+  }).find((result) => result.kind === "table");
+  const config = table?.config as TableConfig;
+  assert.equal(
+    config.columns.find((column) => column.path[0] === "thumb")?.format.kind,
+    "image",
+  );
+});
+
+test("a single record with an image is offered as a card with its picture", () => {
+  const results = recommend({
+    name: "Acme",
+    logo: "https://cdn.example.com/acme-logo.svg",
+    employees: 240,
+  });
+  const cards = results.find((result) => result.kind === "cards");
+  assert.equal(results[0].id, "cards-root");
+  assert.deepEqual((cards?.config as CardsConfig).imagePath, ["logo"]);
+});
+
+test("cards without any image keep their plain framing", () => {
+  const cards = recommend({
+    rows: [{ region: "North", total: 5 }],
+  }).find((result) => result.kind === "cards");
+  assert.equal((cards?.config as CardsConfig).imagePath, null);
+  assert.match(cards?.title ?? "", /cards$/);
 });
 
 test("a single-record response falls back to a card view", () => {

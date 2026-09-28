@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -20,19 +20,70 @@ import {
 } from "recharts";
 import { formatValue } from "@/lib/format";
 import { resolveChart, toChartRows } from "@/lib/widget-data";
-import type { ChartConfig } from "@/lib/types";
+import type { ChartConfig, FieldFormat } from "@/lib/types";
 import { WidgetIssues } from "./widget-issues";
 
 const SERIES_COLORS = [
-  "oklch(53% 0.19 262)",
-  "oklch(58% 0.14 155)",
-  "oklch(72% 0.15 75)",
-  "oklch(56% 0.19 25)",
-  "oklch(55% 0.17 300)",
-  "oklch(60% 0.12 210)",
+  "oklch(53% 0.2 272)",
+  "oklch(64% 0.17 200)",
+  "oklch(57% 0.14 158)",
+  "oklch(69% 0.15 72)",
+  "oklch(55% 0.2 24)",
+  "oklch(58% 0.17 320)",
 ];
 
-const AXIS_STYLE = { fontSize: 11, fill: "oklch(50.5% 0.015 260)" } as const;
+const GRID_COLOR = "oklch(92.8% 0.006 265)";
+const AXIS_TICK = { fontSize: 11, fill: "oklch(63% 0.014 268)" } as const;
+const LEGEND_STYLE = { fontSize: 11, paddingTop: 4 } as const;
+const AXIS_LINE = { stroke: GRID_COLOR } as const;
+
+interface TooltipEntry {
+  name?: string | number;
+  value?: number | string;
+  color?: string;
+}
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  measureFormat,
+  dimensionFormat,
+}: {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: unknown;
+  measureFormat: FieldFormat;
+  dimensionFormat: FieldFormat;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+
+  return (
+    <div className="chart-tooltip-shell">
+      <p className="mb-1 text-[11px] font-medium text-ink">
+        {formatValue(label, dimensionFormat)}
+      </p>
+      <ul className="flex flex-col gap-0.5">
+        {payload.map((entry, index) => (
+          <li
+            key={`${entry.name}-${index}`}
+            className="flex items-center gap-2 text-[11px] text-ink-muted"
+          >
+            <span
+              className="size-2 rounded-full"
+              style={{ backgroundColor: entry.color }}
+              aria-hidden
+            />
+            <span>{entry.name}</span>
+            <span className="ml-auto font-medium tabular-nums text-ink">
+              {formatValue(entry.value, measureFormat)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function ChartWidget({
   config,
@@ -41,6 +92,7 @@ export function ChartWidget({
   config: ChartConfig;
   data: unknown;
 }) {
+  const gradientId = useId().replace(/[^a-zA-Z0-9]/g, "");
   const resolved = useMemo(() => resolveChart(config, data), [config, data]);
 
   if (resolved.error || !resolved.value) {
@@ -49,10 +101,10 @@ export function ChartWidget({
 
   const { points, measureLabels, truncated } = resolved.value;
   const rows = toChartRows(resolved.value);
-  const primaryFormat = config.measures[0]?.format ?? { kind: "auto" as const };
-  const formatMeasure = (value: unknown) => formatValue(value, primaryFormat);
-  const formatDimension = (value: unknown) =>
-    formatValue(value, config.dimension.format);
+  const measureFormat = config.measures[0]?.format ?? { kind: "auto" as const };
+  const dimensionFormat = config.dimension.format;
+  const formatMeasure = (value: unknown) => formatValue(value, measureFormat);
+  const formatDimension = (value: unknown) => formatValue(value, dimensionFormat);
 
   if (points.length === 0) {
     return (
@@ -62,26 +114,59 @@ export function ChartWidget({
     );
   }
 
+  const tooltip = (
+    <Tooltip
+      cursor={{ fill: "oklch(53% 0.2 272 / 0.06)" }}
+      content={
+        <ChartTooltip
+          measureFormat={measureFormat}
+          dimensionFormat={dimensionFormat}
+        />
+      }
+    />
+  );
+
+  const sharedAxes = (
+    <>
+      <CartesianGrid strokeDasharray="4 4" stroke={GRID_COLOR} vertical={false} />
+      <XAxis
+        dataKey="label"
+        tick={AXIS_TICK}
+        tickFormatter={formatDimension}
+        tickLine={false}
+        axisLine={AXIS_LINE}
+        interval="preserveStartEnd"
+        minTickGap={12}
+      />
+      <YAxis
+        tick={AXIS_TICK}
+        width={58}
+        tickFormatter={formatMeasure}
+        tickLine={false}
+        axisLine={false}
+      />
+    </>
+  );
+
   return (
     <div className="flex h-full flex-col gap-2">
       <WidgetIssues missing={resolved.missing} />
 
-      <div className="min-h-[12rem] flex-1">
+      <div className="min-h-[11rem] flex-1">
         <ResponsiveContainer width="100%" height="100%">
           {config.chartType === "pie" ? (
             <PieChart>
-              <Tooltip
-                wrapperClassName="chart-tooltip"
-                formatter={(value: unknown) => formatMeasure(value)}
-              />
-              <Legend wrapperStyle={AXIS_STYLE} />
+              {tooltip}
+              <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
               <Pie
                 data={rows}
                 dataKey={measureLabels[0]}
                 nameKey="label"
-                innerRadius="45%"
-                outerRadius="75%"
-                paddingAngle={1}
+                innerRadius="52%"
+                outerRadius="80%"
+                paddingAngle={2}
+                stroke="oklch(100% 0 0)"
+                strokeWidth={2}
               >
                 {rows.map((row, index) => (
                   <Cell
@@ -93,73 +178,69 @@ export function ChartWidget({
             </PieChart>
           ) : config.chartType === "bar" ? (
             <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(92.4% 0.006 250)" />
-              <XAxis
-                dataKey="label"
-                tick={AXIS_STYLE}
-                tickFormatter={formatDimension}
-                interval="preserveStartEnd"
-              />
-              <YAxis tick={AXIS_STYLE} width={56} tickFormatter={formatMeasure} />
-              <Tooltip
-                wrapperClassName="chart-tooltip"
-                formatter={(value: unknown) => formatMeasure(value)}
-                labelFormatter={formatDimension}
-              />
-              {measureLabels.length > 1 ? <Legend wrapperStyle={AXIS_STYLE} /> : null}
+              {sharedAxes}
+              {tooltip}
+              {measureLabels.length > 1 ? (
+                <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
+              ) : null}
               {measureLabels.map((label, index) => (
                 <Bar
                   key={label}
                   dataKey={label}
                   fill={SERIES_COLORS[index % SERIES_COLORS.length]}
-                  radius={[4, 4, 0, 0]}
+                  radius={[6, 6, 2, 2]}
+                  maxBarSize={48}
                 />
               ))}
             </BarChart>
           ) : config.chartType === "area" ? (
             <AreaChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(92.4% 0.006 250)" />
-              <XAxis
-                dataKey="label"
-                tick={AXIS_STYLE}
-                tickFormatter={formatDimension}
-                interval="preserveStartEnd"
-              />
-              <YAxis tick={AXIS_STYLE} width={56} tickFormatter={formatMeasure} />
-              <Tooltip
-                wrapperClassName="chart-tooltip"
-                formatter={(value: unknown) => formatMeasure(value)}
-                labelFormatter={formatDimension}
-              />
-              {measureLabels.length > 1 ? <Legend wrapperStyle={AXIS_STYLE} /> : null}
+              <defs>
+                {measureLabels.map((label, index) => (
+                  <linearGradient
+                    key={label}
+                    id={`${gradientId}-${index}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor={SERIES_COLORS[index % SERIES_COLORS.length]}
+                      stopOpacity={0.35}
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor={SERIES_COLORS[index % SERIES_COLORS.length]}
+                      stopOpacity={0.02}
+                    />
+                  </linearGradient>
+                ))}
+              </defs>
+              {sharedAxes}
+              {tooltip}
+              {measureLabels.length > 1 ? (
+                <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
+              ) : null}
               {measureLabels.map((label, index) => (
                 <Area
                   key={label}
                   type="monotone"
                   dataKey={label}
                   stroke={SERIES_COLORS[index % SERIES_COLORS.length]}
-                  fill={SERIES_COLORS[index % SERIES_COLORS.length]}
-                  fillOpacity={0.18}
+                  fill={`url(#${gradientId}-${index})`}
                   strokeWidth={2}
                 />
               ))}
             </AreaChart>
           ) : (
             <LineChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(92.4% 0.006 250)" />
-              <XAxis
-                dataKey="label"
-                tick={AXIS_STYLE}
-                tickFormatter={formatDimension}
-                interval="preserveStartEnd"
-              />
-              <YAxis tick={AXIS_STYLE} width={56} tickFormatter={formatMeasure} />
-              <Tooltip
-                wrapperClassName="chart-tooltip"
-                formatter={(value: unknown) => formatMeasure(value)}
-                labelFormatter={formatDimension}
-              />
-              {measureLabels.length > 1 ? <Legend wrapperStyle={AXIS_STYLE} /> : null}
+              {sharedAxes}
+              {tooltip}
+              {measureLabels.length > 1 ? (
+                <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
+              ) : null}
               {measureLabels.map((label, index) => (
                 <Line
                   key={label}
@@ -168,6 +249,7 @@ export function ChartWidget({
                   stroke={SERIES_COLORS[index % SERIES_COLORS.length]}
                   strokeWidth={2}
                   dot={false}
+                  activeDot={{ r: 4, strokeWidth: 0 }}
                 />
               ))}
             </LineChart>

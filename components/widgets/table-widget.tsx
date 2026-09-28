@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
-import { formatValue } from "@/lib/format";
+import { isNumericFormat } from "@/lib/format";
 import { getByPath } from "@/lib/infer-schema";
 import { resolveTable } from "@/lib/widget-data";
 import type { FieldPath, TableConfig } from "@/lib/types";
+import { FieldValue } from "./field-value";
 import { WidgetIssues } from "./widget-issues";
 
 function samePath(a: FieldPath, b: FieldPath) {
@@ -48,20 +49,18 @@ export function TableWidget({
       if (!current || !samePath(current.path, path)) {
         return { path, direction: "asc" };
       }
-      return current.direction === "asc"
-        ? { path, direction: "desc" }
-        : null;
+      return current.direction === "asc" ? { path, direction: "desc" } : null;
     });
     setPage(0);
   };
 
   return (
-    <div className="flex h-full flex-col gap-2">
+    <div className="flex h-full flex-col gap-2.5">
       <WidgetIssues missing={resolved.missing} />
 
-      <label className="relative">
+      <label className="relative block">
         <Search
-          className="pointer-events-none absolute top-2 left-2 size-3.5 text-ink-subtle"
+          className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-subtle"
           aria-hidden
         />
         <span className="sr-only">Search table rows</span>
@@ -72,25 +71,31 @@ export function TableWidget({
             setPage(0);
           }}
           placeholder="Search rows"
-          className="w-full rounded-lg border border-line-strong bg-surface py-1.5 pr-2 pl-7 text-xs"
+          className="w-full rounded-lg border border-line-strong bg-surface py-1.5 pr-2.5 pl-8 text-xs shadow-xs transition-[border-color,box-shadow] placeholder:text-ink-subtle focus:border-brand focus:ring-2 focus:ring-brand/18 focus:outline-none"
         />
       </label>
 
-      <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-line">
+      <div className="scroll-slim min-h-0 flex-1 overflow-auto rounded-xl border border-line">
         <table className="w-full border-collapse text-left text-xs">
-          <thead className="sticky top-0 bg-surface-muted">
+          <thead className="sticky top-0 z-10 bg-surface-muted/95 backdrop-blur">
             <tr>
               {columns.map((column) => {
                 const active = sort && samePath(sort.path, column.path);
+                const numeric = isNumericFormat(column.format);
                 return (
-                  <th key={column.path.join(".")} scope="col" className="p-0">
+                  <th
+                    key={column.path.join(".")}
+                    scope="col"
+                    className="border-b border-line p-0 first:rounded-tl-xl last:rounded-tr-xl"
+                  >
                     <button
                       type="button"
                       onClick={() => toggleSort(column.path)}
                       aria-label={`Sort by ${column.label}`}
                       className={cn(
-                        "flex w-full items-center gap-1 px-2.5 py-2 font-medium whitespace-nowrap",
-                        active ? "text-brand-strong" : "text-ink-muted",
+                        "flex w-full items-center gap-1 px-3 py-2 text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase transition-colors hover:text-ink",
+                        numeric && "justify-end",
+                        active ? "text-brand-strong" : "text-ink-subtle",
                       )}
                     >
                       {column.label}
@@ -111,14 +116,22 @@ export function TableWidget({
             {visible.map((row, rowIndex) => (
               <tr
                 key={rowIndex}
-                className="border-t border-line even:bg-surface-muted/40"
+                className="border-b border-line/70 transition-colors last:border-0 hover:bg-brand-soft/60"
               >
                 {columns.map((column) => (
                   <td
                     key={column.path.join(".")}
-                    className="max-w-[18rem] truncate px-2.5 py-1.5"
+                    className={cn(
+                      "max-w-[20rem] truncate px-3 py-2",
+                      isNumericFormat(column.format) &&
+                        "text-right tabular-nums",
+                    )}
                   >
-                    {formatValue(getByPath(row, column.path), column.format)}
+                    <FieldValue
+                      value={getByPath(row, column.path)}
+                      format={column.format}
+                      label={column.label}
+                    />
                   </td>
                 ))}
               </tr>
@@ -127,7 +140,7 @@ export function TableWidget({
               <tr>
                 <td
                   colSpan={Math.max(1, columns.length)}
-                  className="px-2.5 py-6 text-center text-ink-muted"
+                  className="px-3 py-8 text-center text-ink-muted"
                 >
                   No rows match this view.
                 </td>
@@ -137,32 +150,34 @@ export function TableWidget({
         </table>
       </div>
 
-      <div className="flex items-center justify-between text-[11px] text-ink-muted">
+      <div className="flex items-center justify-between gap-2 text-[11px] text-ink-subtle">
         <span>
           {rows.length === totalRows
             ? `${rows.length} row${rows.length === 1 ? "" : "s"}`
             : `${rows.length} of ${totalRows} rows`}
         </span>
         {pageCount > 1 ? (
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-1">
             <Button
-              size="sm"
+              size="icon"
               variant="ghost"
+              aria-label="Previous page"
               disabled={currentPage === 0}
               onClick={() => setPage(currentPage - 1)}
             >
-              Previous
+              <ChevronLeft className="size-3.5" aria-hidden />
             </Button>
-            <span>
-              Page {currentPage + 1} of {pageCount}
+            <span className="tabular-nums">
+              {currentPage + 1} / {pageCount}
             </span>
             <Button
-              size="sm"
+              size="icon"
               variant="ghost"
+              aria-label="Next page"
               disabled={currentPage >= pageCount - 1}
               onClick={() => setPage(currentPage + 1)}
             >
-              Next
+              <ChevronRight className="size-3.5" aria-hidden />
             </Button>
           </span>
         ) : null}

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { use } from "react";
-import { ArrowLeft } from "lucide-react";
 import { WidgetBuilder } from "@/components/widget-builder";
+import { PageHeader } from "@/components/page-header";
 import { buttonClasses } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useDashboard } from "@/lib/store/workspace";
@@ -29,17 +29,12 @@ export default function EditWidgetPage({
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <Link
-          href={`/dashboards/${id}/edit`}
-          className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden />
-          {dashboard.name}
-        </Link>
-        <h1 className="mt-2 text-xl font-semibold">Edit {widget.title}</h1>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        back={{ href: `/dashboards/${id}/edit`, label: dashboard.name }}
+        title={`Edit ${widget.title}`}
+        description="Change the view, its field mapping, or where it sits on the dashboard."
+      />
 
       <WidgetBuilder dashboardId={id} widget={widget} />
     </div>

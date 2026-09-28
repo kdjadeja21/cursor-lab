@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { SelectField, TextAreaField, TextField } from "@/components/ui/field";
@@ -34,20 +35,18 @@ export default function NewDashboardPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-5">
-      <div>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden />
-          Dashboards
-        </Link>
-        <h1 className="mt-2 text-xl font-semibold">Create dashboard</h1>
-      </div>
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
+      <PageHeader
+        back={{ href: "/", label: "Dashboards" }}
+        title="Create dashboard"
+        description="Name it now; widgets and sources can be added in any order."
+      />
 
       <Card>
-        <CardHeader title="Dashboard details" />
+        <CardHeader
+          icon={<LayoutDashboard className="size-3.5" aria-hidden />}
+          title="Dashboard details"
+        />
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4">
           <TextField
             label="Name"

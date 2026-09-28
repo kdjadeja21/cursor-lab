@@ -2,10 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Loader2, RefreshCw, Save, Wand2 } from "lucide-react";
+import {
+  Database,
+  Eye,
+  Loader2,
+  RefreshCw,
+  Save,
+  Settings2,
+  SlidersHorizontal,
+  Sparkles,
+  Wand2,
+} from "lucide-react";
 import { FieldPicker } from "@/components/field-picker";
 import { JsonTree } from "@/components/json-tree";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -21,7 +32,11 @@ import {
   type FieldSummary,
   type SchemaNode,
 } from "@/lib/infer-schema";
-import { emptyConfigFor, recommendVisualizations } from "@/lib/recommend";
+import {
+  cardsConfig,
+  emptyConfigFor,
+  recommendVisualizations,
+} from "@/lib/recommend";
 import { useRefresh } from "@/lib/store/refresh";
 import { useWorkspace } from "@/lib/store/workspace";
 import type {
@@ -73,7 +88,12 @@ function seedConfig(kind: WidgetKind, schema: SchemaNode | null): WidgetConfig {
     case "table":
       return { ...config, sourcePath };
     case "cards":
-      return { ...config, sourcePath };
+      // Reuses the recommendation's own logic so a manually chosen card view
+      // still picks up an image and a heading when the data has them.
+      return cardsConfig(
+        sourcePath,
+        candidateFields(schema ? findNode(schema, sourcePath) : null),
+      );
     case "chart":
       return { ...config, sourcePath };
     case "kpi": {
@@ -198,10 +218,59 @@ function ConfigEditor({
         />
       );
 
-    case "cards":
+    case "cards": {
+      const imageFields = fields.filter((field) => field.kind === "image");
       return (
         <div className="flex flex-col gap-4">
           {sourceSelector}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectField
+              label="Card image"
+              value={config.imagePath ? pathLabel(config.imagePath) : ""}
+              hint={
+                imageFields.length === 0
+                  ? "No image URLs were found in this data."
+                  : "Shown at the top of every card."
+              }
+              onChange={(event) =>
+                onChange({
+                  ...config,
+                  imagePath:
+                    fields.find(
+                      (field) => pathLabel(field.path) === event.target.value,
+                    )?.path ?? null,
+                })
+              }
+            >
+              <option value="">No image</option>
+              {(imageFields.length > 0 ? imageFields : fields).map((field) => (
+                <option key={pathLabel(field.path)} value={pathLabel(field.path)}>
+                  {pathLabel(field.path)}
+                  {field.kind === "image" ? " · image" : ""}
+                </option>
+              ))}
+            </SelectField>
+            <SelectField
+              label="Card heading"
+              value={config.titlePath ? pathLabel(config.titlePath) : ""}
+              onChange={(event) =>
+                onChange({
+                  ...config,
+                  titlePath:
+                    fields.find(
+                      (field) => pathLabel(field.path) === event.target.value,
+                    )?.path ?? null,
+                })
+              }
+            >
+              <option value="">No heading</option>
+              {fields.map((field) => (
+                <option key={pathLabel(field.path)} value={pathLabel(field.path)}>
+                  {pathLabel(field.path)}
+                </option>
+              ))}
+            </SelectField>
+          </div>
           <FieldPicker
             legend="Fields"
             candidates={fields}
@@ -223,6 +292,7 @@ function ConfigEditor({
           />
         </div>
       );
+    }
 
     case "chart": {
       const dimensionValue = pathLabel(config.dimension.path);
@@ -442,6 +512,7 @@ export function WidgetBuilder({
       <div className="flex flex-col gap-5">
         <Card>
           <CardHeader
+            icon={<Database className="size-3.5" aria-hidden />}
             title="Data source"
             description="Widgets read from a connection's most recent successful response."
             actions={
@@ -495,6 +566,7 @@ export function WidgetBuilder({
         {schema ? (
           <Card>
             <CardHeader
+              icon={<Sparkles className="size-3.5" aria-hidden />}
               title="Suggested views"
               description="Based on the response shape and field types. Pick one to prefill the mapping."
             />
@@ -505,7 +577,7 @@ export function WidgetBuilder({
                   and map the fields yourself.
                 </p>
               ) : (
-                recommendations.map((recommendation) => (
+                recommendations.map((recommendation, index) => (
                   <button
                     key={recommendation.id}
                     type="button"
@@ -515,21 +587,23 @@ export function WidgetBuilder({
                       setAppliedId(recommendation.id);
                     }}
                     aria-pressed={appliedId === recommendation.id}
-                    className={
+                    className={cn(
+                      "rounded-xl border p-2.5 text-left transition-[background-color,border-color,box-shadow] duration-150",
                       appliedId === recommendation.id
-                        ? "rounded-lg border border-brand bg-brand-soft p-2.5 text-left"
-                        : "rounded-lg border border-line p-2.5 text-left hover:bg-surface-muted"
-                    }
+                        ? "border-brand bg-brand-soft shadow-xs ring-1 ring-brand/20"
+                        : "border-line bg-surface hover:border-line-strong hover:bg-surface-muted",
+                    )}
                   >
-                    <span className="flex items-center gap-2">
+                    <span className="flex flex-wrap items-center gap-2">
                       <Badge tone="brand">
                         {recommendation.chartType ?? recommendation.kind}
                       </Badge>
-                      <span className="text-xs font-medium">
+                      <span className="text-xs font-semibold">
                         {recommendation.title}
                       </span>
+                      {index === 0 ? <Badge tone="positive">Best fit</Badge> : null}
                     </span>
-                    <span className="mt-1 block text-[11px] text-ink-muted">
+                    <span className="mt-1 block text-[11px] leading-relaxed text-ink-muted">
                       {recommendation.reason}
                     </span>
                   </button>
@@ -559,7 +633,10 @@ export function WidgetBuilder({
 
         {schema && config ? (
           <Card>
-            <CardHeader title="Fields and formatting" />
+            <CardHeader
+              icon={<SlidersHorizontal className="size-3.5" aria-hidden />}
+              title="Fields and formatting"
+            />
             <div className="flex flex-col gap-4 p-4">
               <ConfigEditor config={config} schema={schema} onChange={setConfig} />
             </div>
@@ -570,6 +647,7 @@ export function WidgetBuilder({
       <div className="flex flex-col gap-5 lg:sticky lg:top-20 lg:self-start">
         <Card>
           <CardHeader
+            icon={<Eye className="size-3.5" aria-hidden />}
             title="Preview"
             description={
               config
@@ -589,7 +667,10 @@ export function WidgetBuilder({
         </Card>
 
         <Card>
-          <CardHeader title="Widget settings" />
+          <CardHeader
+            icon={<Settings2 className="size-3.5" aria-hidden />}
+            title="Widget settings"
+          />
           <div className="flex flex-col gap-4 p-4">
             <TextField
               label="Widget title"

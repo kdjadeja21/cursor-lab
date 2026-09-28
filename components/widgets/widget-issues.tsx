@@ -16,7 +16,7 @@ export function WidgetIssues({
   if (!error && missing.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border border-warning/30 bg-warning/10 p-2.5 text-[11px] text-ink">
+    <div className="flex flex-col gap-1.5 rounded-lg border border-warning/30 bg-warning-soft p-2.5 text-[11px] leading-relaxed text-ink">
       {error ? (
         <p className="flex items-start gap-1.5">
           <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-warning" aria-hidden />

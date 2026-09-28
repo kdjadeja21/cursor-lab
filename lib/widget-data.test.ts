@@ -117,6 +117,8 @@ test("cards render one card per record, capped by maxCards", () => {
     kind: "cards",
     sourcePath: ["orders"],
     fields: [{ path: ["status"], label: "Status", format: auto }],
+    imagePath: null,
+    titlePath: null,
     maxCards: 2,
   };
   const resolved = resolveCards(config, PAYLOAD);
@@ -130,12 +132,46 @@ test("cards over a single object produce one card", () => {
       kind: "cards",
       sourcePath: ["summary"],
       fields: [{ path: ["totalOrders"], label: "Orders", format: auto }],
+      imagePath: null,
+      titlePath: null,
       maxCards: 6,
     },
     PAYLOAD,
   );
   assert.equal(resolved.value?.length, 1);
   assert.equal(resolved.value?.[0].fields[0].value, 3);
+});
+
+test("cards expose an image URL and a title when they are mapped", () => {
+  const resolved = resolveCards(
+    {
+      kind: "cards",
+      sourcePath: ["products"],
+      fields: [{ path: ["price"], label: "Price", format: auto }],
+      imagePath: ["photo"],
+      titlePath: ["name"],
+      maxCards: 6,
+    },
+    {
+      products: [
+        {
+          name: "Monitor",
+          photo: "https://cdn.example.com/monitor.jpg",
+          price: 329,
+        },
+        { name: "Dock", photo: "not-a-url", price: 149 },
+      ],
+    },
+  );
+
+  assert.equal(resolved.value?.[0].imageUrl, "https://cdn.example.com/monitor.jpg");
+  assert.equal(resolved.value?.[0].title, "Monitor");
+  assert.equal(
+    resolved.value?.[1].imageUrl,
+    null,
+    "a value that is not an image URL is ignored rather than rendered",
+  );
+  assert.equal(resolved.value?.[1].title, "Dock");
 });
 
 test("charts group repeated dimension values and sum the measure", () => {

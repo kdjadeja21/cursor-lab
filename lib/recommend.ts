@@ -48,7 +48,7 @@ function humanize(path: FieldPath): string {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
-function formatFor(field: {
+export function defaultFormatFor(field: {
   path: FieldPath;
   kind: FieldSummary["kind"];
 }): FieldFormat {
@@ -56,6 +56,10 @@ function formatFor(field: {
   switch (field.kind) {
     case "date":
       return { kind: "date" };
+    case "image":
+      return { kind: "image" };
+    case "url":
+      return { kind: "link" };
     case "number":
       if (PERCENT_HINT.test(label)) return { kind: "percent", decimals: 1 };
       if (CURRENCY_HINT.test(label)) {
@@ -74,7 +78,7 @@ function toMapping(field: {
   return {
     path: field.path,
     label: humanize(field.path),
-    format: formatFor(field),
+    format: defaultFormatFor(field),
   };
 }
 
@@ -114,15 +118,51 @@ function kpiConfig(
   return { kind: "kpi", metrics: metrics.map(toMapping) };
 }
 
-function cardsConfig(
+/** Ordered by how much a field reads like the headline of a record. */
+const TITLE_HINTS = [
+  /(^|[._-])(name|title)$/i,
+  /(^|[._-])(headline|subject|label)$/i,
+  /(^|[._-])(sku|code|slug)$/i,
+];
+
+function pickImage<T extends { path: FieldPath; kind: FieldSummary["kind"] }>(
+  fields: T[],
+): T | undefined {
+  return fields.find((field) => field.kind === "image");
+}
+
+/**
+ * Cards get an image header when the record carries an image URL, and a title
+ * field when one of its text fields reads like a name.
+ */
+export function cardsConfig(
   sourcePath: FieldPath,
   fields: { path: FieldPath; kind: FieldSummary["kind"] }[],
+  options: { maxCards?: number } = {},
 ): CardsConfig {
+  const image = pickImage(fields);
+  const titleCandidates = fields.filter((field) => field.kind === "string");
+  const title = TITLE_HINTS.reduce<(typeof fields)[number] | undefined>(
+    (found, hint) =>
+      found ??
+      titleCandidates.find((field) => hint.test(pathLabel(field.path))),
+    undefined,
+  );
+  const detailFields = fields.filter(
+    (field) =>
+      field !== image &&
+      field !== title &&
+      field.kind !== "image" &&
+      !ID_HINT.test(pathLabel(field.path)),
+  );
+
   return {
     kind: "cards",
     sourcePath,
-    fields: fields.slice(0, MAX_CARD_FIELDS).map(toMapping),
-    maxCards: 6,
+    fields: detailFields.slice(0, MAX_CARD_FIELDS).map(toMapping),
+    imagePath: image?.path ?? null,
+    titlePath: title?.path ?? null,
+    maxCards: options.maxCards ?? 6,
   };
 }
 
@@ -268,26 +308,33 @@ export function recommendVisualizations(root: SchemaNode): Recommendation[] {
       }
     }
 
+    const image = pickImage(fields);
     recommendations.push({
       id: `cards-${label}`,
       kind: "cards",
       chartType: null,
-      title: `${humanize(source)} cards`,
-      reason: `Shows the first records from ${label} one card at a time.`,
-      score: 55 - index * 5,
-      config: cardsConfig(source, fields),
+      title: image ? `${humanize(source)} gallery` : `${humanize(source)} cards`,
+      reason: image
+        ? `${pathLabel(image.path)} holds image URLs, so each record can be shown as a card with its picture.`
+        : `Shows the first records from ${label} one card at a time.`,
+      // An image in the records is the strongest signal in the response: no
+      // other view can show it, so the gallery is offered first.
+      score: (image ? 95 : 55) - index * 5,
+      config: cardsConfig(source, fields, { maxCards: image ? 8 : 6 }),
     });
   }
 
   if (tables.length === 0 && scalars.length > 1) {
+    const image = pickImage(scalars);
     recommendations.push({
       id: "cards-root",
       kind: "cards",
       chartType: null,
-      title: "Response fields",
-      reason:
-        "The response is a single record, so its fields are shown as a card.",
-      score: 50,
+      title: image ? "Record card with image" : "Response fields",
+      reason: image
+        ? `The response is a single record and ${pathLabel(image.path)} is an image URL, so it is shown as a card with its picture.`
+        : "The response is a single record, so its fields are shown as a card.",
+      score: image ? 95 : 50,
       config: cardsConfig([], scalars),
     });
   }
@@ -310,7 +357,14 @@ export function emptyConfigFor(kind: WidgetKind): WidgetConfig {
     case "kpi":
       return { kind: "kpi", metrics: [] };
     case "cards":
-      return { kind: "cards", sourcePath: [], fields: [], maxCards: 6 };
+      return {
+        kind: "cards",
+        sourcePath: [],
+        fields: [],
+        imagePath: null,
+        titlePath: null,
+        maxCards: 6,
+      };
     case "chart":
       return {
         kind: "chart",

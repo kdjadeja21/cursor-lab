@@ -77,6 +77,10 @@ export function formatValue(value: unknown, format: FieldFormat): string {
       return formatDate(value);
     case "text":
       return truncate(typeof value === "string" ? value : JSON.stringify(value));
+    case "image":
+    case "link":
+      // Rendered as an element by the widget; this is the fallback text form.
+      return truncate(String(value));
     case "auto":
       if (typeof value === "number") return formatNumber(value, undefined);
       if (typeof value === "boolean") return value ? "Yes" : "No";
@@ -105,4 +109,11 @@ export const FORMAT_LABELS: Record<FieldFormat["kind"], string> = {
   currency: "Currency",
   percent: "Percent",
   date: "Date",
+  image: "Image",
+  link: "Link",
 };
+
+/** Numbers read better right-aligned; everything else stays left-aligned. */
+export function isNumericFormat(format: FieldFormat) {
+  return ["number", "currency", "percent"].includes(format.kind);
+}

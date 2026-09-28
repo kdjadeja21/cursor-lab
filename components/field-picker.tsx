@@ -1,8 +1,10 @@
 "use client";
 
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Plus } from "lucide-react";
+import { cn } from "@/lib/cn";
 import { FORMAT_LABELS } from "@/lib/format";
 import { pathLabel, type FieldSummary } from "@/lib/infer-schema";
+import { defaultFormatFor } from "@/lib/recommend";
 import type { FieldFormat, FieldMapping, FieldPath } from "@/lib/types";
 
 const FORMAT_KINDS = Object.keys(FORMAT_LABELS) as FieldFormat["kind"][];
@@ -46,7 +48,7 @@ export function FieldPicker({
       {
         path: candidate.path,
         label: candidate.label,
-        format: { kind: "auto" },
+        format: defaultFormatFor(candidate),
       },
     ]);
   };
@@ -86,14 +88,20 @@ export function FieldPicker({
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => toggle(candidate)}
-                className={
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors duration-150",
                   isSelected
-                    ? "rounded-full bg-brand px-2.5 py-1 text-[11px] font-medium text-white"
-                    : "rounded-full border border-line-strong px-2.5 py-1 text-[11px] text-ink-muted hover:bg-surface-muted"
-                }
+                    ? "border-brand bg-brand text-white shadow-xs"
+                    : "border-line-strong bg-surface text-ink-muted hover:border-ink-subtle/50 hover:bg-surface-muted",
+                )}
               >
-                {pathLabel(candidate.path)}
-                <span className="ml-1 opacity-70">{candidate.kind}</span>
+                {isSelected ? (
+                  <Check className="size-3" aria-hidden />
+                ) : (
+                  <Plus className="size-3 opacity-60" aria-hidden />
+                )}
+                <span className="font-mono">{pathLabel(candidate.path)}</span>
+                <span className="opacity-65">{candidate.kind}</span>
               </button>
             );
           })}

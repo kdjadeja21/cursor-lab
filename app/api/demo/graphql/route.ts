@@ -5,14 +5,18 @@ interface GraphqlBody {
   variables?: unknown;
 }
 
+/** Product photos are real image URLs so image detection has something to find. */
 const PRODUCTS = [
-  { sku: "KB-01", name: "Keyboard", category: "Peripherals", price: 89 },
-  { sku: "MS-02", name: "Mouse", category: "Peripherals", price: 45 },
-  { sku: "MN-27", name: "Monitor 27\"", category: "Displays", price: 329 },
-  { sku: "MN-32", name: "Monitor 32\"", category: "Displays", price: 519 },
-  { sku: "DK-04", name: "Dock", category: "Accessories", price: 149 },
-  { sku: "HS-08", name: "Headset", category: "Audio", price: 119 },
-];
+  { sku: "KB-01", name: "Keyboard", category: "Peripherals", price: 89, seed: "keyboard" },
+  { sku: "MS-02", name: "Mouse", category: "Peripherals", price: 45, seed: "mouse" },
+  { sku: "MN-27", name: 'Monitor 27"', category: "Displays", price: 329, seed: "monitor" },
+  { sku: "MN-32", name: 'Monitor 32"', category: "Displays", price: 519, seed: "display" },
+  { sku: "DK-04", name: "Dock", category: "Accessories", price: 149, seed: "dock" },
+  { sku: "HS-08", name: "Headset", category: "Audio", price: 119, seed: "headset" },
+].map(({ seed, ...product }) => ({
+  ...product,
+  imageUrl: `https://picsum.photos/seed/${seed}/400/280`,
+}));
 
 /**
  * Minimal stand-in for a GraphQL service: it does not parse the query, it just

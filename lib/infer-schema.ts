@@ -5,11 +5,23 @@ export type ValueKind =
   | "string"
   | "date"
   | "boolean"
+  | "image"
+  | "url"
   | "null"
   | "object"
   | "array"
   | "objectArray"
   | "mixed";
+
+/** Scalar kinds that can be mapped into a widget field. */
+export const SCALAR_KINDS: ValueKind[] = [
+  "number",
+  "string",
+  "date",
+  "boolean",
+  "image",
+  "url",
+];
 
 export interface FieldSummary {
   /** Path relative to the containing row. */
@@ -41,6 +53,14 @@ const MAX_ROW_FLATTEN_DEPTH = 2;
 const DATE_PATTERN =
   /^\d{4}-\d{2}(-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?)?$/;
 
+const IMAGE_EXTENSION = /\.(png|jpe?g|gif|webp|avif|svg|bmp|ico)(\?|#|$)/i;
+/**
+ * Hosts and path fragments that serve images without a file extension, which is
+ * common for CDNs, avatar services, and placeholder generators.
+ */
+const IMAGE_URL_HINT =
+  /(^|[./-])(images?|img|photos?|avatars?|thumbnails?|thumbs?|picsum|gravatar|cloudinary|imgix|unsplash|dicebear|placehold)([./-]|$)/i;
+
 export function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -51,6 +71,33 @@ export function looksLikeDate(value: unknown): boolean {
   if (trimmed.length < 6 || trimmed.length > 40) return false;
   if (!DATE_PATTERN.test(trimmed)) return false;
   return !Number.isNaN(Date.parse(trimmed));
+}
+
+function parseHttpUrl(value: unknown): URL | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (trimmed.length < 11 || trimmed.length > 2048) return null;
+  if (!/^https?:\/\//i.test(trimmed)) return null;
+  try {
+    return new URL(trimmed);
+  } catch {
+    return null;
+  }
+}
+
+export function looksLikeUrl(value: unknown): boolean {
+  return parseHttpUrl(value) !== null;
+}
+
+/**
+ * Recognises image URLs from the value alone, by file extension first and then
+ * by well-known image hosts and path segments.
+ */
+export function looksLikeImageUrl(value: unknown): boolean {
+  const url = parseHttpUrl(value);
+  if (!url) return false;
+  if (IMAGE_EXTENSION.test(url.pathname)) return true;
+  return IMAGE_URL_HINT.test(url.hostname) || IMAGE_URL_HINT.test(url.pathname);
 }
 
 export function kindOf(value: unknown): ValueKind {
@@ -65,7 +112,12 @@ export function kindOf(value: unknown): ValueKind {
   if (isPlainObject(value)) return "object";
   if (typeof value === "number") return Number.isFinite(value) ? "number" : "null";
   if (typeof value === "boolean") return "boolean";
-  if (typeof value === "string") return looksLikeDate(value) ? "date" : "string";
+  if (typeof value === "string") {
+    if (looksLikeDate(value)) return "date";
+    if (looksLikeImageUrl(value)) return "image";
+    if (looksLikeUrl(value)) return "url";
+    return "string";
+  }
   return "mixed";
 }
 
@@ -253,23 +305,17 @@ export interface ScalarCandidate {
 export function findScalars(root: SchemaNode): ScalarCandidate[] {
   const found: ScalarCandidate[] = [];
   const visit = (node: SchemaNode) => {
-    switch (node.kind) {
-      case "number":
-      case "string":
-      case "date":
-      case "boolean":
-        found.push({
-          path: node.path,
-          label: node.label,
-          kind: node.kind,
-          value: node.sample,
-        });
-        break;
-      case "object":
-        for (const child of node.children) visit(child);
-        break;
-      default:
-        break;
+    if (SCALAR_KINDS.includes(node.kind)) {
+      found.push({
+        path: node.path,
+        label: node.label,
+        kind: node.kind,
+        value: node.sample,
+      });
+      return;
+    }
+    if (node.kind === "object") {
+      for (const child of node.children) visit(child);
     }
   };
   visit(root);
@@ -298,9 +344,7 @@ export function candidateFields(node: SchemaNode | null): FieldSummary[] {
   if (node.kind === "objectArray") return node.fields ?? [];
   if (node.kind === "object") {
     return node.children
-      .filter((child) =>
-        ["number", "string", "date", "boolean"].includes(child.kind),
-      )
+      .filter((child) => SCALAR_KINDS.includes(child.kind))
       .map((child) => ({
         path: [child.path[child.path.length - 1]],
         label: child.path[child.path.length - 1],
