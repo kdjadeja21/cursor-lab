@@ -276,6 +276,46 @@ export function findScalars(root: SchemaNode): ScalarCandidate[] {
   return found;
 }
 
+export function findNode(root: SchemaNode, path: FieldPath): SchemaNode | null {
+  if (path.length === 0) return root;
+  let current: SchemaNode | null = root;
+  for (const segment of path) {
+    const next: SchemaNode | undefined = current?.children.find(
+      (child) => child.path[child.path.length - 1] === segment,
+    );
+    if (!next) return null;
+    current = next;
+  }
+  return current;
+}
+
+/**
+ * Fields that can be mapped under a node: row columns for a list of records,
+ * or scalar keys for an object.
+ */
+export function candidateFields(node: SchemaNode | null): FieldSummary[] {
+  if (!node) return [];
+  if (node.kind === "objectArray") return node.fields ?? [];
+  if (node.kind === "object") {
+    return node.children
+      .filter((child) =>
+        ["number", "string", "date", "boolean"].includes(child.kind),
+      )
+      .map((child) => ({
+        path: [child.path[child.path.length - 1]],
+        label: child.path[child.path.length - 1],
+        kind: child.kind,
+        distinctCount: 1,
+        filledCount: 1,
+        numeric:
+          typeof child.sample === "number"
+            ? { min: child.sample, max: child.sample, sum: child.sample }
+            : null,
+      }));
+  }
+  return [];
+}
+
 export function countNodes(root: SchemaNode): number {
   return 1 + root.children.reduce((total, child) => total + countNodes(child), 0);
 }
