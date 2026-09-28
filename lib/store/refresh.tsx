@@ -6,12 +6,11 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { executeConnection } from "../runner.ts";
-import { useWorkspace } from "./workspace.tsx";
+import { getSnapshot, putCache } from "./store.ts";
 import type { ApiConnection, CachedResponse } from "../types.ts";
 
 const TICK_MS = 5_000;
@@ -48,85 +47,81 @@ function nextDueAt(connection: ApiConnection, entry: CachedResponse | undefined)
 }
 
 export function RefreshProvider({ children }: { children: ReactNode }) {
-  const { state, putCache } = useWorkspace();
   const [pending, setPending] = useState<Record<string, boolean>>({});
-  const stateRef = useRef(state);
-  stateRef.current = state;
 
-  const refresh = useCallback(
-    async (connectionId: string) => {
-      const connection = stateRef.current.connections.find(
-        (item) => item.id === connectionId,
-      );
-      if (!connection) return;
+  const refresh = useCallback(async (connectionId: string) => {
+    const connection = getSnapshot().state.connections.find(
+      (item) => item.id === connectionId,
+    );
+    if (!connection) return;
 
-      const previous = stateRef.current.cache[connectionId];
-      setPending((current) => ({ ...current, [connectionId]: true }));
-      // Recorded before the request so the scheduler cannot queue a second run.
+    const previous = getSnapshot().state.cache[connectionId];
+    setPending((current) => ({ ...current, [connectionId]: true }));
+
+    // Stamped before the request so the scheduler cannot queue a second run.
+    putCache({
+      connectionId,
+      data: previous?.data ?? null,
+      status: previous?.status ?? null,
+      durationMs: previous?.durationMs ?? null,
+      fetchedAt: previous?.fetchedAt ?? null,
+      lastAttemptAt: new Date().toISOString(),
+      error: previous?.error ?? null,
+      failureCount: previous?.failureCount ?? 0,
+    });
+
+    const result = await executeConnection(connection);
+    const attemptedAt = new Date().toISOString();
+
+    if (result.ok) {
+      putCache({
+        connectionId,
+        data: result.data,
+        status: result.status,
+        durationMs: result.durationMs,
+        fetchedAt: attemptedAt,
+        lastAttemptAt: attemptedAt,
+        error: null,
+        failureCount: 0,
+      });
+    } else {
+      // The last good payload is kept so widgets show stale data, not nothing.
       putCache({
         connectionId,
         data: previous?.data ?? null,
-        status: previous?.status ?? null,
-        durationMs: previous?.durationMs ?? null,
+        status: result.status,
+        durationMs: result.durationMs,
         fetchedAt: previous?.fetchedAt ?? null,
-        lastAttemptAt: new Date().toISOString(),
-        error: previous?.error ?? null,
-        failureCount: previous?.failureCount ?? 0,
+        lastAttemptAt: attemptedAt,
+        error: result.error ?? "Request failed",
+        failureCount: (previous?.failureCount ?? 0) + 1,
       });
+    }
 
-      const result = await executeConnection(connection);
-      const attemptedAt = new Date().toISOString();
-
-      if (result.ok) {
-        putCache({
-          connectionId,
-          data: result.data,
-          status: result.status,
-          durationMs: result.durationMs,
-          fetchedAt: attemptedAt,
-          lastAttemptAt: attemptedAt,
-          error: null,
-          failureCount: 0,
-        });
-      } else {
-        // The last good payload is kept so widgets show stale data, not nothing.
-        putCache({
-          connectionId,
-          data: previous?.data ?? null,
-          status: result.status,
-          durationMs: result.durationMs,
-          fetchedAt: previous?.fetchedAt ?? null,
-          lastAttemptAt: attemptedAt,
-          error: result.error ?? "Request failed",
-          failureCount: (previous?.failureCount ?? 0) + 1,
-        });
-      }
-
-      setPending((current) => {
-        const { [connectionId]: _done, ...rest } = current;
-        return rest;
-      });
-    },
-    [putCache],
-  );
+    setPending((current) => {
+      const next = { ...current };
+      delete next[connectionId];
+      return next;
+    });
+  }, []);
 
   const refreshMany = useCallback(
     async (connectionIds: string[]) => {
-      const unique = [...new Set(connectionIds)];
-      await Promise.all(unique.map((id) => refresh(id)));
+      await Promise.all([...new Set(connectionIds)].map((id) => refresh(id)));
     },
     [refresh],
   );
 
   useEffect(() => {
     const tick = () => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      const current = stateRef.current;
+      if (document.hidden) return;
+      const { state } = getSnapshot();
       const now = Date.now();
-      for (const connection of current.connections) {
+      for (const connection of state.connections) {
         if (connection.refreshSeconds === null) continue;
-        const entry = current.cache[connection.id];
-        if (now >= nextDueAt(connection, entry)) void refresh(connection.id);
+        if (now >= nextDueAt(connection, state.cache[connection.id])) {
+          void refresh(connection.id);
+        }
       }
     };
 
