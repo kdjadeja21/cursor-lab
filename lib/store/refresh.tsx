@@ -10,12 +10,10 @@ import {
   type ReactNode,
 } from "react";
 import { executeConnection } from "../runner.ts";
+import { isDue } from "../schedule.ts";
 import { getSnapshot, putCache } from "./store.ts";
-import type { ApiConnection, CachedResponse } from "../types.ts";
 
 const TICK_MS = 5_000;
-const MAX_BACKOFF_MULTIPLIER = 8;
-const MIN_RETRY_MS = 30_000;
 
 interface RefreshContextValue {
   pending: Record<string, boolean>;
@@ -24,27 +22,6 @@ interface RefreshContextValue {
 }
 
 const RefreshContext = createContext<RefreshContextValue | null>(null);
-
-/**
- * Failed connections back off exponentially so a broken endpoint is not polled
- * at its configured interval forever.
- */
-function nextDueAt(connection: ApiConnection, entry: CachedResponse | undefined) {
-  if (connection.refreshSeconds === null) return Number.POSITIVE_INFINITY;
-  const intervalMs = connection.refreshSeconds * 1000;
-  if (!entry?.lastAttemptAt) return 0;
-  const lastAttempt = Date.parse(entry.lastAttemptAt);
-  if (Number.isNaN(lastAttempt)) return 0;
-  const multiplier = Math.min(
-    2 ** Math.max(0, entry.failureCount),
-    MAX_BACKOFF_MULTIPLIER,
-  );
-  const delay =
-    entry.failureCount > 0
-      ? Math.max(intervalMs * multiplier, MIN_RETRY_MS)
-      : intervalMs;
-  return lastAttempt + delay;
-}
 
 export function RefreshProvider({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState<Record<string, boolean>>({});
@@ -118,8 +95,7 @@ export function RefreshProvider({ children }: { children: ReactNode }) {
       const { state } = getSnapshot();
       const now = Date.now();
       for (const connection of state.connections) {
-        if (connection.refreshSeconds === null) continue;
-        if (now >= nextDueAt(connection, state.cache[connection.id])) {
+        if (isDue(connection, state.cache[connection.id], now)) {
           void refresh(connection.id);
         }
       }
