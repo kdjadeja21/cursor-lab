@@ -1,4 +1,4 @@
-import type { ApiConnection, CachedResponse } from "@/lib/types";
+import type { ApiConnection, CachedResponse } from "./types.ts";
 
 export type FreshnessStatus = "empty" | "fresh" | "stale" | "error";
 

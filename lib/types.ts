@@ -86,12 +86,16 @@ export interface CardsConfig {
   maxCards: number;
 }
 
+export type Aggregation = "none" | "sum" | "avg" | "count" | "min" | "max";
+
 export interface ChartConfig {
   kind: "chart";
   chartType: ChartType;
   sourcePath: FieldPath;
   dimension: FieldMapping;
   measures: FieldMapping[];
+  /** How repeated dimension values are combined. */
+  aggregation: Aggregation;
   sort: { by: "dimension" | "measure"; direction: "asc" | "desc" } | null;
   maxPoints: number;
 }

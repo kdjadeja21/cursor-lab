@@ -1,5 +1,5 @@
-import { newId } from "@/lib/id";
-import type { ApiConnection, AuthConfig, KeyValue } from "@/lib/types";
+import { newId } from "./id.ts";
+import type { ApiConnection, AuthConfig, KeyValue } from "./types.ts";
 
 export const DEFAULT_TIMEOUT_MS = 15_000;
 export const MIN_TIMEOUT_MS = 1_000;

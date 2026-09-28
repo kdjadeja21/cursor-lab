@@ -6,7 +6,7 @@ import {
   assertSafeUrl,
   isAddressAllowed,
   UnsafeUrlError,
-} from "@/lib/server/ssrf";
+} from "./ssrf.ts";
 
 export const MAX_REDIRECTS = 3;
 

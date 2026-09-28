@@ -1,4 +1,4 @@
-import type { Session, WorkspaceState } from "@/lib/types";
+import type { Session, WorkspaceState } from "../types.ts";
 
 const SESSION_KEY = "fetchboard:session";
 const WORKSPACE_VERSION = 1;

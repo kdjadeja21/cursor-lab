@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { newId } from "@/lib/id";
+import { newId } from "../id.ts";
 import {
   clearSession,
   emptyWorkspace,
@@ -18,7 +18,7 @@ import {
   readWorkspace,
   writeSession,
   writeWorkspace,
-} from "@/lib/store/storage";
+} from "./storage.ts";
 import type {
   ApiConnection,
   CachedResponse,
@@ -26,7 +26,7 @@ import type {
   Session,
   Widget,
   WorkspaceState,
-} from "@/lib/types";
+} from "../types.ts";
 
 interface WorkspaceContextValue {
   ready: boolean;

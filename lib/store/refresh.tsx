@@ -10,9 +10,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { executeConnection } from "@/lib/runner";
-import { useWorkspace } from "@/lib/store/workspace";
-import type { ApiConnection, CachedResponse } from "@/lib/types";
+import { executeConnection } from "../runner.ts";
+import { useWorkspace } from "./workspace.tsx";
+import type { ApiConnection, CachedResponse } from "../types.ts";
 
 const TICK_MS = 5_000;
 const MAX_BACKOFF_MULTIPLIER = 8;

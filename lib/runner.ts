@@ -1,5 +1,5 @@
-import { activePairs } from "@/lib/connection";
-import type { ApiConnection } from "@/lib/types";
+import { activePairs } from "./connection.ts";
+import type { ApiConnection } from "./types.ts";
 
 export interface ExecuteRequest {
   apiType: ApiConnection["apiType"];
