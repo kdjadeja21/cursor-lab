@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-canvas: oklch(98.4% 0.003 250);
+  --color-surface: oklch(100% 0 0);
+  --color-surface-muted: oklch(97% 0.004 250);
+  --color-line: oklch(92.4% 0.006 250);
+  --color-line-strong: oklch(86% 0.008 250);
+  --color-ink: oklch(21% 0.02 260);
+  --color-ink-muted: oklch(50.5% 0.015 260);
+  --color-ink-subtle: oklch(64% 0.012 260);
+  --color-brand: oklch(53% 0.19 262);
+  --color-brand-strong: oklch(46% 0.2 262);
+  --color-brand-soft: oklch(96% 0.02 262);
+  --color-positive: oklch(58% 0.14 155);
+  --color-warning: oklch(72% 0.15 75);
+  --color-danger: oklch(56% 0.19 25);
+  --color-danger-soft: oklch(96.5% 0.02 25);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .chart-tooltip {
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-line);
+    background-color: var(--color-surface);
+    font-size: 0.75rem;
+  }
 }
