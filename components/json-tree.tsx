@@ -20,7 +20,7 @@ const KIND_META: Record<ValueKind, { label: string; className: string }> = {
   mixed: { label: "mixed", className: "text-ink-subtle" },
 };
 
-const DEFAULT_OPEN_DEPTH = 2;
+const DEFAULT_OPEN_DEPTH = 3;
 
 function previewValue(node: SchemaNode): string {
   switch (node.kind) {

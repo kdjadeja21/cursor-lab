@@ -127,6 +127,14 @@
     background-size: 200% 100%;
     animation: fetchboard-shimmer 1.4s linear infinite;
   }
+
+  .cell-updated {
+    animation: fetchboard-cell-flash 1.8s var(--ease-out-soft);
+  }
+
+  .row-added {
+    animation: fetchboard-row-added 1.4s var(--ease-out-soft);
+  }
 }
 
 @keyframes fetchboard-fade-in {
@@ -149,9 +157,33 @@
   }
 }
 
+@keyframes fetchboard-cell-flash {
+  0% {
+    background-color: color-mix(in oklab, var(--color-brand) 22%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes fetchboard-row-added {
+  0% {
+    background-color: color-mix(in oklab, var(--color-positive) 16%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-in-fade,
   .shimmer {
     animation: none;
+  }
+
+  .cell-updated,
+  .row-added {
+    animation: none;
+    box-shadow: inset 3px 0 0 var(--color-brand);
   }
 }

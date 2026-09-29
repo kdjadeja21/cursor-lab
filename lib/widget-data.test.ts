@@ -198,6 +198,29 @@ test("each aggregation combines a repeated dimension differently", () => {
   assert.equal(amountFor("max"), 150);
 });
 
+test("points keep the unstringified dimension value for formatting", () => {
+  const resolved = resolveChart(
+    {
+      ...chartConfig,
+      dimension: { path: ["inStock"], label: "In stock", format: auto },
+      sort: null,
+    },
+    {
+      orders: [
+        { inStock: true, amount: 10 },
+        { inStock: false, amount: 20 },
+      ],
+    },
+  );
+  assert.deepEqual(
+    resolved.value?.points.map((point) => [point.label, point.raw]),
+    [
+      ["true", true],
+      ["false", false],
+    ],
+  );
+});
+
 test("aggregation none keeps every row as its own point", () => {
   const resolved = resolveChart(
     { ...chartConfig, aggregation: "none", sort: null },

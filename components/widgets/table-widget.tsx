@@ -1,11 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { isNumericFormat } from "@/lib/format";
 import { getByPath } from "@/lib/infer-schema";
+import {
+  cellKey,
+  describeTableDiff,
+  diffTableSnapshots,
+  EMPTY_TABLE_DIFF,
+  isStatusField,
+  rowIdAt,
+  snapshotTable,
+  statusTone,
+  tabularRows,
+  type TableDiff,
+  type TableSnapshot,
+} from "@/lib/table-diff";
 import { resolveTable } from "@/lib/widget-data";
 import type { FieldPath, TableConfig } from "@/lib/types";
 import { FieldValue } from "./field-value";
@@ -15,6 +29,13 @@ function samePath(a: FieldPath, b: FieldPath) {
   return a.length === b.length && a.every((segment, index) => segment === b[index]);
 }
 
+const FLASH_MS = 1800;
+
+/**
+ * Table payload is replaced on each scheduled fetch, but the grid stays put:
+ * search/sort/page are local, rows keep a stable id, and only cells whose
+ * values actually changed get a brief highlight (typically status).
+ */
 export function TableWidget({
   config,
   data,
@@ -25,11 +46,54 @@ export function TableWidget({
   const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState(config.sort);
+  const [seen, setSeen] = useState<{
+    snapshot: TableSnapshot;
+    diff: TableDiff;
+  } | null>(null);
+
+  const sourceRows = useMemo(
+    () => tabularRows(getByPath(data, config.sourcePath)),
+    [config.sourcePath, data],
+  );
+
+  const snapshot = useMemo(
+    () => snapshotTable(sourceRows, config.columns),
+    [config.columns, sourceRows],
+  );
+
+  if (seen?.snapshot !== snapshot) {
+    setSeen({
+      snapshot,
+      diff: diffTableSnapshots(seen?.snapshot ?? null, snapshot),
+    });
+  }
+
+  const diff = seen?.snapshot === snapshot ? seen.diff : EMPTY_TABLE_DIFF;
+
+  useEffect(() => {
+    if (
+      diff.changedCells.size === 0 &&
+      diff.addedRows.size === 0 &&
+      diff.removedRows.size === 0
+    ) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setSeen((current) =>
+        current && current.snapshot === snapshot
+          ? { snapshot: current.snapshot, diff: EMPTY_TABLE_DIFF }
+          : current,
+      );
+    }, FLASH_MS);
+    return () => window.clearTimeout(timer);
+  }, [diff, snapshot]);
 
   const resolved = useMemo(
     () => resolveTable({ ...config, search: query || config.search, sort }, data),
     [config, data, query, sort],
   );
+
+  const announcement = describeTableDiff(diff, config.columns);
 
   if (resolved.error || !resolved.value) {
     return <WidgetIssues error={resolved.error} missing={resolved.missing} />;
@@ -57,6 +121,9 @@ export function TableWidget({
   return (
     <div className="flex h-full flex-col gap-2.5">
       <WidgetIssues missing={resolved.missing} />
+      <p className="sr-only" aria-live="polite">
+        {announcement}
+      </p>
 
       <label className="relative block">
         <Search
@@ -113,29 +180,59 @@ export function TableWidget({
             </tr>
           </thead>
           <tbody>
-            {visible.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                className="border-b border-line/70 transition-colors last:border-0 hover:bg-brand-soft/60"
-              >
-                {columns.map((column) => (
-                  <td
-                    key={column.path.join(".")}
-                    className={cn(
-                      "max-w-[20rem] truncate px-3 py-2",
-                      isNumericFormat(column.format) &&
-                        "text-right tabular-nums",
-                    )}
-                  >
-                    <FieldValue
-                      value={getByPath(row, column.path)}
-                      format={column.format}
-                      label={column.label}
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {visible.map((row, rowIndex) => {
+              const fallbackIndex = sourceRows.indexOf(row);
+              const rowId = rowIdAt(
+                row,
+                fallbackIndex === -1 ? rowIndex : fallbackIndex,
+                snapshot.identity,
+              );
+              const added = diff.addedRows.has(rowId);
+              return (
+                <tr
+                  key={rowId}
+                  className={cn(
+                    "border-b border-line/70 transition-colors last:border-0 hover:bg-brand-soft/60",
+                    added && "row-added",
+                  )}
+                >
+                  {columns.map((column) => {
+                    const value = getByPath(row, column.path);
+                    const changed = diff.changedCells.has(
+                      cellKey(rowId, column.path),
+                    );
+                    const status = isStatusField(column.label);
+                    return (
+                      <td
+                        key={column.path.join(".")}
+                        className={cn(
+                          "max-w-[20rem] truncate px-3 py-2",
+                          isNumericFormat(column.format) &&
+                            "text-right tabular-nums",
+                          changed && "cell-updated",
+                        )}
+                      >
+                        {status ? (
+                          <Badge tone={statusTone(value)} dot>
+                            <FieldValue
+                              value={value}
+                              format={column.format}
+                              label={column.label}
+                            />
+                          </Badge>
+                        ) : (
+                          <FieldValue
+                            value={value}
+                            format={column.format}
+                            label={column.label}
+                          />
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
             {visible.length === 0 ? (
               <tr>
                 <td

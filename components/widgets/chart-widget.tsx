@@ -13,12 +13,12 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import { formatValue } from "@/lib/format";
+import { useElementSize } from "./use-element-size";
 import { resolveChart, toChartRows } from "@/lib/widget-data";
 import type { ChartConfig, FieldFormat } from "@/lib/types";
 import { WidgetIssues } from "./widget-issues";
@@ -47,13 +47,16 @@ function ChartTooltip({
   active,
   payload,
   label,
-  measureFormat,
+  measureFormats,
+  fallbackFormat,
   dimensionFormat,
 }: {
   active?: boolean;
   payload?: TooltipEntry[];
   label?: unknown;
-  measureFormat: FieldFormat;
+  /** Keyed by series label so each measure keeps its own formatting. */
+  measureFormats?: Record<string, FieldFormat>;
+  fallbackFormat: FieldFormat;
   dimensionFormat: FieldFormat;
 }) {
   if (!active || !payload || payload.length === 0) return null;
@@ -76,7 +79,10 @@ function ChartTooltip({
             />
             <span>{entry.name}</span>
             <span className="ml-auto font-medium tabular-nums text-ink">
-              {formatValue(entry.value, measureFormat)}
+              {formatValue(
+                entry.value,
+                measureFormats?.[String(entry.name)] ?? fallbackFormat,
+              )}
             </span>
           </li>
         ))}
@@ -93,6 +99,7 @@ export function ChartWidget({
   data: unknown;
 }) {
   const gradientId = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const [chartRef, { width, height }] = useElementSize<HTMLDivElement>();
   const resolved = useMemo(() => resolveChart(config, data), [config, data]);
 
   if (resolved.error || !resolved.value) {
@@ -102,9 +109,23 @@ export function ChartWidget({
   const { points, measureLabels, truncated } = resolved.value;
   const rows = toChartRows(resolved.value);
   const measureFormat = config.measures[0]?.format ?? { kind: "auto" as const };
+  const measureFormats = Object.fromEntries(
+    measureLabels.map((label, index) => [
+      label,
+      config.measures[index]?.format ?? measureFormat,
+    ]),
+  );
   const dimensionFormat = config.dimension.format;
+  // The shared y axis can only use one format, so it follows the first measure.
   const formatMeasure = (value: unknown) => formatValue(value, measureFormat);
-  const formatDimension = (value: unknown) => formatValue(value, dimensionFormat);
+  // Recharts hands back the stringified axis key, so the original value is
+  // looked up again to format booleans, numbers, and dates properly.
+  const rawByLabel = new Map(points.map((point) => [point.label, point.raw]));
+  const formatDimension = (value: unknown) =>
+    formatValue(
+      rawByLabel.has(String(value)) ? rawByLabel.get(String(value)) : value,
+      dimensionFormat,
+    );
 
   if (points.length === 0) {
     return (
@@ -119,7 +140,8 @@ export function ChartWidget({
       cursor={{ fill: "oklch(53% 0.2 272 / 0.06)" }}
       content={
         <ChartTooltip
-          measureFormat={measureFormat}
+          measureFormats={measureFormats}
+          fallbackFormat={measureFormat}
           dimensionFormat={dimensionFormat}
         />
       }
@@ -152,10 +174,10 @@ export function ChartWidget({
     <div className="flex h-full flex-col gap-2">
       <WidgetIssues missing={resolved.missing} />
 
-      <div className="min-h-[11rem] flex-1">
-        <ResponsiveContainer width="100%" height="100%">
-          {config.chartType === "pie" ? (
-            <PieChart>
+      <div ref={chartRef} className="min-h-[11rem] flex-1">
+        {width > 0 && height > 0 ? (
+          config.chartType === "pie" ? (
+            <PieChart width={width} height={height}>
               {tooltip}
               <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
               <Pie
@@ -177,7 +199,12 @@ export function ChartWidget({
               </Pie>
             </PieChart>
           ) : config.chartType === "bar" ? (
-            <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+            <BarChart
+              data={rows}
+              width={width}
+              height={height}
+              margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+            >
               {sharedAxes}
               {tooltip}
               {measureLabels.length > 1 ? (
@@ -194,7 +221,12 @@ export function ChartWidget({
               ))}
             </BarChart>
           ) : config.chartType === "area" ? (
-            <AreaChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+            <AreaChart
+              data={rows}
+              width={width}
+              height={height}
+              margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+            >
               <defs>
                 {measureLabels.map((label, index) => (
                   <linearGradient
@@ -235,7 +267,12 @@ export function ChartWidget({
               ))}
             </AreaChart>
           ) : (
-            <LineChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+            <LineChart
+              data={rows}
+              width={width}
+              height={height}
+              margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+            >
               {sharedAxes}
               {tooltip}
               {measureLabels.length > 1 ? (
@@ -253,8 +290,8 @@ export function ChartWidget({
                 />
               ))}
             </LineChart>
-          )}
-        </ResponsiveContainer>
+          )
+        ) : null}
       </div>
 
       {truncated ? (

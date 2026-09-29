@@ -187,6 +187,8 @@ export function resolveCards(
 
 export interface ChartPoint {
   label: string;
+  /** The unstringified dimension value, so renderers can format it by type. */
+  raw: unknown;
   /** Measure label to aggregated numeric value. */
   values: Record<string, number>;
 }
@@ -246,17 +248,21 @@ export function resolveChart(
     measureLabels.push(label);
   }
 
-  const groups = new Map<string, { label: string; series: number[][] }>();
+  const groups = new Map<
+    string,
+    { label: string; raw: unknown; series: number[][] }
+  >();
   for (const [rowIndex, row] of rows.entries()) {
     const rawLabel = getByPath(row, config.dimension.path);
     const label = rawLabel === undefined || rawLabel === null ? "—" : String(rawLabel);
     const key = config.aggregation === "none" ? `${label}\u0000${rowIndex}` : label;
     const group =
       groups.get(key) ??
-      ({ label, series: config.measures.map(() => []) } satisfies {
-        label: string;
-        series: number[][];
-      });
+      ({
+        label,
+        raw: rawLabel,
+        series: config.measures.map(() => []),
+      } satisfies { label: string; raw: unknown; series: number[][] });
     config.measures.forEach((measure, index) => {
       const numeric = toNumber(getByPath(row, measure.path));
       if (numeric !== null) group.series[index].push(numeric);
@@ -266,6 +272,7 @@ export function resolveChart(
 
   let points: ChartPoint[] = [...groups.values()].map((group) => ({
     label: group.label,
+    raw: group.raw,
     values: Object.fromEntries(
       group.series.map((values, index) => [
         measureLabels[index],

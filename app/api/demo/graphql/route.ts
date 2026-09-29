@@ -62,7 +62,7 @@ export async function POST(request: Request) {
           products: PRODUCTS.slice(0, Math.max(1, limit)).map(
             (product, index) => ({
               ...product,
-              unitsSold: 40 + ((index * 23 + now / 100_000) % 160),
+              unitsSold: Math.round(40 + ((index * 23 + now / 100_000) % 160)),
               inStock: index % 4 !== 0,
             }),
           ),
