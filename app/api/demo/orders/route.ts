@@ -11,6 +11,9 @@ const CUSTOMERS = [
   "Margaret Hamilton",
 ] as const;
 
+/** Advances on each request in this process so a refresh always has a status delta. */
+let statusTick = 0;
+
 /**
  * Bundled sample endpoint so the connection wizard has something to talk to
  * without depending on an external service. Amounts drift on each call, and a
@@ -21,7 +24,7 @@ const CUSTOMERS = [
  */
 export function GET() {
   const now = Date.now();
-  const statusTick = Math.floor(now / 15_000);
+  statusTick += 1;
   const orders = Array.from({ length: 24 }, (_, index) => {
     const date = new Date(now - index * 86_400_000 * 0.5);
     const customer = CUSTOMERS[index % CUSTOMERS.length];
