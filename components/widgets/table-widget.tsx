@@ -23,6 +23,7 @@ import {
 import { resolveTable } from "@/lib/widget-data";
 import type { FieldPath, TableConfig } from "@/lib/types";
 import { FieldValue } from "./field-value";
+import { TableDownload } from "./table-download";
 import { WidgetIssues } from "./widget-issues";
 
 function samePath(a: FieldPath, b: FieldPath) {
@@ -125,22 +126,25 @@ export function TableWidget({
         {announcement}
       </p>
 
-      <label className="relative block">
-        <Search
-          className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-subtle"
-          aria-hidden
-        />
-        <span className="sr-only">Search table rows</span>
-        <input
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setPage(0);
-          }}
-          placeholder="Search rows"
-          className="w-full rounded-lg border border-line-strong bg-surface py-1.5 pr-2.5 pl-8 text-xs shadow-xs transition-[border-color,box-shadow] placeholder:text-ink-subtle focus:border-brand focus:ring-2 focus:ring-brand/18 focus:outline-none"
-        />
-      </label>
+      <div className="flex items-center gap-2">
+        <label className="relative block min-w-0 flex-1">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-subtle"
+            aria-hidden
+          />
+          <span className="sr-only">Search table rows</span>
+          <input
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(0);
+            }}
+            placeholder="Search rows"
+            className="w-full rounded-lg border border-line-strong bg-surface py-1.5 pr-2.5 pl-8 text-xs shadow-xs transition-[border-color,box-shadow] placeholder:text-ink-subtle focus:border-brand focus:ring-2 focus:ring-brand/18 focus:outline-none"
+          />
+        </label>
+        <TableDownload columns={columns} rows={rows} />
+      </div>
 
       <div className="scroll-slim min-h-0 flex-1 overflow-auto rounded-xl border border-line">
         <table className="w-full border-collapse text-left text-xs">
