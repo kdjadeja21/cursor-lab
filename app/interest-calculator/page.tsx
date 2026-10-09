@@ -1,6 +1,13 @@
 import type { Metadata } from "next"
+import { Newsreader } from "next/font/google"
 
 import { InterestCalculator } from "@/components/interest-calculator/interest-calculator"
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "Interest calculator",
@@ -10,11 +17,15 @@ export const metadata: Metadata = {
 
 export default function InterestCalculatorPage() {
   return (
-    <main className="flex flex-1 flex-col bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 md:px-6 md:py-14">
-        <header className="flex max-w-2xl flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Interest calculator</h1>
-          <p className="text-muted-foreground">
+    <main
+      className={`${newsreader.variable} interest-dashboard bg-radial-glow flex flex-1 flex-col text-foreground`}
+    >
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-12 md:px-8 md:py-16">
+        <header className="flex max-w-[68ch] flex-col gap-3">
+          <h1 className="interest-display text-4xl font-medium tracking-tight text-balance md:text-5xl">
+            Interest calculator
+          </h1>
+          <p className="text-base leading-relaxed text-muted-foreground md:text-lg">
             Compare simple and compound interest. Enter a principal, an annual rate, and a
             time period. Results appear after you choose Calculate. Editing the inputs doesn&apos;t
             update them until you press Calculate again.

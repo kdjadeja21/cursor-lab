@@ -1,10 +1,18 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import dynamic from "next/dynamic"
 import { createContext, use, useId, useState, type ReactNode } from "react"
 import { Controller, useForm, useWatch, type Control } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   Empty,
   EmptyDescription,
@@ -20,6 +28,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -41,6 +50,15 @@ import {
   type InterestResult,
   type TimeUnit,
 } from "@/lib/interest"
+
+const InterestGrowthChart = dynamic(
+  () =>
+    import("./interest-growth-chart").then((module) => module.InterestGrowthChart),
+  {
+    ssr: false,
+    loading: () => <ChartLoading />,
+  },
+)
 
 interface InterestCalculatorState {
   result: InterestResult | null
@@ -145,12 +163,9 @@ function useInterestCalculator(): InterestCalculatorContextValue {
 export function InterestCalculator() {
   return (
     <InterestCalculatorProvider>
-      <div className="grid gap-8 md:grid-cols-2 md:items-start">
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-10">
         <InterestCalculatorForm />
-        <div className="flex flex-col gap-6">
-          <InterestCalculatorSummary />
-          <InterestCalculatorSchedule />
-        </div>
+        <InterestCalculatorResults />
       </div>
     </InterestCalculatorProvider>
   )
@@ -219,6 +234,7 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
           }
         }
       },
+      // Server Actions skipped: calculating interest is not a mutation.
       submit: () => {
         void form.handleSubmit(
           (submitted) => {
@@ -243,51 +259,66 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
 
 function InterestCalculatorForm() {
   const { actions } = useInterestCalculator()
+  const titleId = useId()
 
   return (
-    <form
-      aria-label="Interest inputs"
-      className="flex flex-col gap-5"
-      noValidate
-      onSubmit={(event) => {
-        event.preventDefault()
-        actions.submit()
-      }}
-    >
-      <FieldGroup>
-        <NumberField
-          name="principal"
-          label="Principal (USD)"
-          description="Amount you start with, in US dollars."
-        />
-        <NumberField
-          name="annualRatePercent"
-          label="Annual rate (%)"
-          description="Nominal annual rate. Enter 5 for 5%."
-        />
-        <NumberField
-          name="time"
-          label="Time period"
-          description="How long the money earns interest."
-        />
-        <ChoiceField
-          name="timeUnit"
-          label="Time unit"
-          description="Months are converted to years for the calculation."
-          options={TIME_UNIT_OPTIONS}
-        />
-        <ChoiceField
-          name="method"
-          label="Interest type"
-          description="Compound interest uses the frequency below."
-          options={METHOD_OPTIONS}
-        />
-        <FrequencyField />
-      </FieldGroup>
-      <Button type="submit" className="w-full md:w-fit">
-        Calculate
-      </Button>
-    </form>
+    <Card className="shadow-sm lg:sticky lg:top-6">
+      <CardHeader>
+        <CardTitle>
+          <h2 id={titleId} className="text-lg font-medium">
+            Interest inputs
+          </h2>
+        </CardTitle>
+        <CardDescription>
+          Principal, rate, and time. These values are used when you choose Calculate.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          aria-labelledby={titleId}
+          className="flex flex-col gap-6"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault()
+            actions.submit()
+          }}
+        >
+          <FieldGroup>
+            <NumberField
+              name="principal"
+              label="Principal (USD)"
+              description="Amount you start with, in US dollars."
+            />
+            <NumberField
+              name="annualRatePercent"
+              label="Annual rate (%)"
+              description="Nominal annual rate. Enter 5 for 5%."
+            />
+            <NumberField
+              name="time"
+              label="Time period"
+              description="How long the money earns interest."
+            />
+            <ChoiceField
+              name="timeUnit"
+              label="Time unit"
+              description="Months are converted to years for the calculation."
+              options={TIME_UNIT_OPTIONS}
+            />
+            <ChoiceField
+              name="method"
+              label="Interest type"
+              description="Compound interest uses the frequency below."
+              options={METHOD_OPTIONS}
+            />
+            <FrequencyField />
+          </FieldGroup>
+          <Button type="submit" size="lg" className="w-full">
+            Calculate
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -418,13 +449,13 @@ function ChoiceField({
   )
 }
 
-function InterestCalculatorSummary() {
+function InterestCalculatorResults() {
   const { state } = useInterestCalculator()
-  const headingId = useId()
+  const scheduleHeadingId = useId()
   const result = state.result
   if (!result) {
     return (
-      <Empty className="border border-border bg-card">
+      <Empty className="min-h-72 border border-border bg-card">
         <EmptyHeader>
           <EmptyTitle>No results yet</EmptyTitle>
           <EmptyDescription>
@@ -436,12 +467,28 @@ function InterestCalculatorSummary() {
   }
 
   return (
-    <section
-      aria-labelledby={headingId}
-      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground"
-    >
-      {/* Card skipped: components/ui/card.tsx is added by PRs #9 and #10. */}
-      <h2 id={headingId} className="text-lg font-semibold">
+    <div className="flex flex-col gap-6">
+      <InterestCalculatorSummary />
+      {canChart(result) ? (
+        <InterestGrowthChart result={result} describedBy={scheduleHeadingId} />
+      ) : null}
+      <InterestCalculatorSchedule headingId={scheduleHeadingId} />
+    </div>
+  )
+}
+
+function InterestCalculatorSummary() {
+  const { state } = useInterestCalculator()
+  const headingId = useId()
+  const result = state.result
+  if (!result) {
+    return null
+  }
+  const principal = principalOf(result)
+
+  return (
+    <section aria-labelledby={headingId} className="flex flex-col gap-4">
+      <h2 id={headingId} className="text-lg font-medium">
         Results
       </h2>
       {/* One short announcement, only when Calculate produces a result. */}
@@ -455,72 +502,126 @@ function InterestCalculatorSummary() {
           scientific notation and are approximate.
         </p>
       ) : null}
-      <dl className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-1">
-          <dt className="text-sm text-muted-foreground">Interest earned</dt>
-          <dd className="text-2xl font-semibold tabular-nums">
-            {formatUsd(result.interestEarned)}
-          </dd>
+      <div className="grid gap-4">
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardDescription>Total amount</CardDescription>
+            <CardTitle className="interest-display text-4xl font-medium tracking-tight tabular-nums md:text-5xl">
+              {formatUsd(result.finalAmount)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card className="shadow-sm" size="sm">
+            <CardHeader>
+              <CardDescription>Interest earned</CardDescription>
+              <CardTitle className="text-2xl font-medium tabular-nums">
+                {formatUsd(result.interestEarned)}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="shadow-sm" size="sm">
+            <CardHeader>
+              <CardDescription>Principal</CardDescription>
+              <CardTitle className="text-2xl font-medium tabular-nums">
+                {formatUsd(principal)}
+              </CardTitle>
+            </CardHeader>
+          </Card>
         </div>
-        <div className="flex flex-col gap-1">
-          <dt className="text-sm text-muted-foreground">Final amount</dt>
-          <dd className="text-2xl font-semibold tabular-nums">
-            {formatUsd(result.finalAmount)}
-          </dd>
-        </div>
-      </dl>
+      </div>
     </section>
   )
 }
 
-function InterestCalculatorSchedule() {
+function InterestCalculatorSchedule({ headingId }: { headingId: string }) {
   const { state } = useInterestCalculator()
-  const headingId = useId()
   const result = state.result
   if (!result) {
     return null
   }
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-3">
-      <h2 id={headingId} className="text-lg font-semibold">
-        Year-by-year breakdown
-      </h2>
-      <Table>
-        <TableCaption className="sr-only">Year-by-year breakdown</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead scope="col">Year</TableHead>
-            <TableHead scope="col" className="text-right">
-              Starting balance
-            </TableHead>
-            <TableHead scope="col" className="text-right">
-              Interest
-            </TableHead>
-            <TableHead scope="col" className="text-right">
-              Ending balance
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {result.rows.map((row) => (
-            <TableRow key={row.year}>
-              <TableCell>
-                {row.partial ? `${row.year} (partial)` : row.year}
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {formatUsd(row.startBalance)}
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {formatUsd(row.interest)}
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {formatUsd(row.endBalance)}
-              </TableCell>
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle>
+          <h2 id={headingId} className="text-lg font-medium">
+            Year-by-year breakdown
+          </h2>
+        </CardTitle>
+        <CardDescription>
+          Starting balance, interest, and ending balance for each year.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="-mx-(--card-spacing)">
+        <Table>
+          <TableCaption className="sr-only">Year-by-year breakdown</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead scope="col">Year</TableHead>
+              <TableHead scope="col" className="text-right">
+                Starting balance
+              </TableHead>
+              <TableHead scope="col" className="text-right">
+                Interest
+              </TableHead>
+              <TableHead scope="col" className="text-right">
+                Ending balance
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </section>
+          </TableHeader>
+          <TableBody>
+            {result.rows.map((row) => (
+              <TableRow key={row.year}>
+                <TableCell>
+                  {row.partial ? `${row.year} (partial)` : row.year}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {formatUsd(row.startBalance)}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {formatUsd(row.interest)}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {formatUsd(row.endBalance)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   )
+}
+
+function ChartLoading() {
+  return (
+    <div aria-busy="true" aria-live="polite">
+      <span className="sr-only">Loading growth chart</span>
+      <Skeleton className="h-72 w-full" />
+    </div>
+  )
+}
+
+function canChart(result: InterestResult): boolean {
+  if (!Number.isFinite(result.finalAmount) || !Number.isFinite(result.interestEarned)) {
+    return false
+  }
+  if (result.rows.length === 0) {
+    return false
+  }
+  return result.rows.every(
+    (row) =>
+      Number.isFinite(row.startBalance) &&
+      Number.isFinite(row.endBalance) &&
+      Number.isFinite(row.interest),
+  )
+}
+
+function principalOf(result: InterestResult): number {
+  const start = result.rows[0]?.startBalance
+  if (typeof start === "number" && Number.isFinite(start)) {
+    return start
+  }
+  return result.finalAmount - result.interestEarned
 }

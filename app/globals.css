@@ -128,3 +128,104 @@
     @apply font-sans;
   }
 }
+
+/* Page-scoped tokens: :root stays unchanged so other routes are left alone. */
+.interest-dashboard {
+  color-scheme: light;
+  caret-color: var(--primary);
+  --background: oklch(0.975 0.008 230);
+  --foreground: oklch(0.21 0.03 255);
+  --card: oklch(0.995 0.004 230);
+  --card-foreground: oklch(0.21 0.03 255);
+  --popover: oklch(0.995 0.004 230);
+  --popover-foreground: oklch(0.21 0.03 255);
+  --primary: oklch(0.4 0.07 200);
+  --primary-foreground: oklch(0.98 0.01 200);
+  --secondary: oklch(0.94 0.012 220);
+  --secondary-foreground: oklch(0.25 0.03 255);
+  --muted: oklch(0.935 0.012 220);
+  --muted-foreground: oklch(0.4 0.03 255);
+  --accent: oklch(0.93 0.03 195);
+  --accent-foreground: oklch(0.25 0.04 200);
+  --destructive: oklch(0.5 0.19 25);
+  --border: oklch(0.88 0.015 230);
+  --input: oklch(0.88 0.015 230);
+  --ring: oklch(0.48 0.07 200);
+  --chart-1: oklch(0.48 0.04 255);
+  --chart-2: oklch(0.52 0.1 190);
+  --radius: 0.8rem;
+}
+
+.interest-display {
+  font-family: var(--font-newsreader), Georgia, serif;
+}
+
+.bg-radial-glow {
+  background-color: var(--background);
+  background-image: radial-gradient(
+    60% 50% at 50% 0%,
+    color-mix(in oklab, var(--primary) 22%, transparent),
+    transparent 70%
+  );
+}
+
+.interest-dashboard ::selection {
+  background-color: color-mix(in oklab, var(--primary) 28%, transparent);
+  color: var(--foreground);
+}
+
+@media (prefers-color-scheme: dark) {
+  .interest-dashboard {
+    color-scheme: dark;
+    --background: oklch(0.17 0.02 255);
+    --foreground: oklch(0.96 0.01 230);
+    --card: oklch(0.22 0.022 255);
+    --card-foreground: oklch(0.96 0.01 230);
+    --popover: oklch(0.22 0.022 255);
+    --popover-foreground: oklch(0.96 0.01 230);
+    --primary: oklch(0.78 0.1 190);
+    --primary-foreground: oklch(0.18 0.03 200);
+    --secondary: oklch(0.28 0.02 255);
+    --secondary-foreground: oklch(0.96 0.01 230);
+    --muted: oklch(0.3 0.02 255);
+    --muted-foreground: oklch(0.78 0.02 230);
+    --accent: oklch(0.32 0.04 195);
+    --accent-foreground: oklch(0.96 0.01 200);
+    --destructive: oklch(0.74 0.15 22);
+    --border: oklch(0.96 0.01 230 / 14%);
+    --input: oklch(0.96 0.01 230 / 18%);
+    --ring: oklch(0.72 0.09 190);
+    --chart-1: oklch(0.75 0.04 255);
+    --chart-2: oklch(0.8 0.11 185);
+  }
+}
+
+.dark .interest-dashboard {
+  color-scheme: dark;
+  --background: oklch(0.17 0.02 255);
+  --foreground: oklch(0.96 0.01 230);
+  --card: oklch(0.22 0.022 255);
+  --card-foreground: oklch(0.96 0.01 230);
+  --popover: oklch(0.22 0.022 255);
+  --popover-foreground: oklch(0.96 0.01 230);
+  --primary: oklch(0.78 0.1 190);
+  --primary-foreground: oklch(0.18 0.03 200);
+  --secondary: oklch(0.28 0.02 255);
+  --secondary-foreground: oklch(0.96 0.01 230);
+  --muted: oklch(0.3 0.02 255);
+  --muted-foreground: oklch(0.78 0.02 230);
+  --accent: oklch(0.32 0.04 195);
+  --accent-foreground: oklch(0.96 0.01 200);
+  --destructive: oklch(0.74 0.15 22);
+  --border: oklch(0.96 0.01 230 / 14%);
+  --input: oklch(0.96 0.01 230 / 18%);
+  --ring: oklch(0.72 0.09 190);
+  --chart-1: oklch(0.75 0.04 255);
+  --chart-2: oklch(0.8 0.11 185);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interest-dashboard .animate-pulse {
+    animation: none;
+  }
+}
