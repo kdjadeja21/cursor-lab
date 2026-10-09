@@ -62,6 +62,7 @@ const InterestGrowthChart = dynamic(
 
 interface InterestCalculatorState {
   result: InterestResult | null
+  stale: boolean
   method: InterestFormInput["method"]
   showAllErrors: boolean
 }
@@ -180,8 +181,18 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
   })
   // Results are computed only when Calculate is submitted, so typing never recalculates.
   const [result, setResult] = useState<InterestResult | null>(null)
+  const [submittedKey, setSubmittedKey] = useState("")
   const values = useWatch({ control: form.control })
   const method: InterestFormInput["method"] = values.method ?? ""
+  // Inputs that matter for the shown result; frequency only counts for compound interest.
+  const inputKey = JSON.stringify([
+    values.principal?.trim() ?? "",
+    values.annualRatePercent?.trim() ?? "",
+    values.time?.trim() ?? "",
+    values.timeUnit ?? "",
+    method,
+    method === "compound" ? (values.frequency ?? "") : "",
+  ])
   const baseId = useId()
   const fieldIds: InterestCalculatorMeta["fieldIds"] = {
     principal: `${baseId}-principal`,
@@ -194,6 +205,7 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
   const value: InterestCalculatorContextValue = {
     state: {
       result,
+      stale: result !== null && inputKey !== submittedKey,
       method,
       showAllErrors: form.formState.isSubmitted,
     },
@@ -239,6 +251,16 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
         void form.handleSubmit(
           (submitted) => {
             setResult(resultFromForm(submitted))
+            setSubmittedKey(
+              JSON.stringify([
+                submitted.principal.trim(),
+                submitted.annualRatePercent.trim(),
+                submitted.time.trim(),
+                submitted.timeUnit,
+                submitted.method,
+                submitted.method === "compound" ? submitted.frequency : "",
+              ]),
+            )
           },
           () => {
             setResult(null)
@@ -467,12 +489,22 @@ function InterestCalculatorResults() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <InterestCalculatorSummary />
-      {canChart(result) ? (
-        <InterestGrowthChart result={result} describedBy={scheduleHeadingId} />
+    <div className="flex min-w-0 flex-col gap-6">
+      {state.stale ? (
+        <p className="rounded-lg border border-border bg-muted px-4 py-3 text-sm font-medium text-foreground">
+          Inputs changed, press Calculate to update. The results below are out of date.
+        </p>
       ) : null}
-      <InterestCalculatorSchedule headingId={scheduleHeadingId} />
+      <div
+        data-stale={state.stale ? true : undefined}
+        className="flex min-w-0 flex-col gap-6 transition-opacity data-[stale]:opacity-50"
+      >
+        <InterestCalculatorSummary />
+        {canChart(result) ? (
+          <InterestGrowthChart result={result} describedBy={scheduleHeadingId} />
+        ) : null}
+        <InterestCalculatorSchedule headingId={scheduleHeadingId} />
+      </div>
     </div>
   )
 }
@@ -487,7 +519,7 @@ function InterestCalculatorSummary() {
   const principal = principalOf(result)
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-4">
+    <section aria-labelledby={headingId} className="flex min-w-0 flex-col gap-4">
       <h2 id={headingId} className="text-lg font-medium">
         Results
       </h2>
@@ -550,20 +582,30 @@ function InterestCalculatorSchedule({ headingId }: { headingId: string }) {
           </h2>
         </CardTitle>
         <CardDescription>
-          Starting balance, interest, and ending balance for each year.
+          Principal and interest earned so far match the chart. Interest this
+          period is the interest for that single year.
         </CardDescription>
       </CardHeader>
       <CardContent className="-mx-(--card-spacing)">
-        <Table>
+        <Table
+          containerProps={{
+            tabIndex: 0,
+            role: "region",
+            "aria-label": "Year-by-year breakdown table, scrollable",
+          }}
+        >
           <TableCaption className="sr-only">Year-by-year breakdown</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead scope="col">Year</TableHead>
               <TableHead scope="col" className="text-right">
-                Starting balance
+                Principal
               </TableHead>
               <TableHead scope="col" className="text-right">
-                Interest
+                Interest earned so far
+              </TableHead>
+              <TableHead scope="col" className="text-right">
+                Interest this period
               </TableHead>
               <TableHead scope="col" className="text-right">
                 Ending balance
@@ -577,7 +619,10 @@ function InterestCalculatorSchedule({ headingId }: { headingId: string }) {
                   {row.partial ? `${row.year} (partial)` : row.year}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {formatUsd(row.startBalance)}
+                  {formatUsd(principalOf(result))}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {formatUsd(row.cumulativeInterest)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatUsd(row.interest)}
@@ -596,7 +641,7 @@ function InterestCalculatorSchedule({ headingId }: { headingId: string }) {
 
 function ChartLoading() {
   return (
-    <div aria-busy="true" aria-live="polite">
+    <div aria-busy="true">
       <span className="sr-only">Loading growth chart</span>
       <Skeleton className="h-72 w-full" />
     </div>

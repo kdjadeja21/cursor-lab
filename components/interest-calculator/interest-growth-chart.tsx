@@ -41,11 +41,14 @@ export function InterestGrowthChart({
   const headingId = useId()
   const reducedMotion = usePrefersReducedMotion()
   const principal = principalOf(result)
-  const points = result.rows.map((row) => ({
+  const rowPoints = result.rows.map((row) => ({
     label: row.partial ? `${row.year} (partial)` : String(row.year),
     principal,
-    interest: row.endBalance - principal,
+    interest: row.cumulativeInterest,
   }))
+  // A single period cannot draw an area, so start the series at year 0.
+  const points =
+    rowPoints.length === 1 ? [{ label: "0", principal, interest: 0 }, ...rowPoints] : rowPoints
 
   return (
     <Card className="shadow-sm">
@@ -68,7 +71,7 @@ export function InterestGrowthChart({
           aria-describedby={describedBy}
         >
           <AreaChart
-            accessibilityLayer
+            accessibilityLayer={false}
             data={points}
             margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
           >

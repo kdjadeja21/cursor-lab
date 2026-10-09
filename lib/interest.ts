@@ -79,6 +79,8 @@ export interface InterestYearRow {
   startBalance: number
   interest: number
   endBalance: number
+  /** Interest earned from the start through the end of this row (end balance minus principal). */
+  cumulativeInterest: number
 }
 
 export interface InterestResult {
@@ -159,11 +161,19 @@ export function resultFromForm(value: InterestFormInput): InterestResult | null 
   return calculateInterest(toCalculation(parsed.data))
 }
 
+/** Rounds to whole cents; the epsilon keeps values such as 1.005 from rounding down. */
+export function roundCents(amount: number): number {
+  if (!Number.isFinite(amount)) {
+    return amount
+  }
+  return Math.round((amount + Number.EPSILON * Math.sign(amount)) * 100) / 100
+}
+
 export function calculateInterest(input: InterestCalculation): InterestResult {
-  const finalAmount = balanceAt(input, input.years)
+  const finalAmount = roundCents(balanceAt(input, input.years))
   const rows = buildRows(input)
   return {
-    interestEarned: finalAmount - input.principal,
+    interestEarned: roundCents(finalAmount - input.principal),
     finalAmount,
     detail: describeCalculation(input),
     tooLarge:
@@ -277,14 +287,15 @@ function buildRows(input: InterestCalculation): InterestYearRow[] {
     const span = Math.min(1, remaining)
     const start = cursor
     const end = cursor + span
-    const startBalance = balanceAt(input, start)
-    const endBalance = balanceAt(input, end)
+    const startBalance = roundCents(balanceAt(input, start))
+    const endBalance = roundCents(balanceAt(input, end))
     rows.push({
       year: rows.length + 1,
       partial: span < 1 - 1e-9,
       startBalance,
-      interest: endBalance - startBalance,
+      interest: roundCents(endBalance - startBalance),
       endBalance,
+      cumulativeInterest: roundCents(endBalance - input.principal),
     })
     cursor = end
     remaining -= span
@@ -348,7 +359,8 @@ function toCalculation(value: InterestFormInput): InterestCalculation {
     throw new Error("Interest form was parsed before it was valid.")
   }
   const base: CalculationBase = {
-    principal: Number(value.principal.trim()),
+    // Principal is rounded to cents first so every figure derives from the same amount.
+    principal: roundCents(Number(value.principal.trim())),
     annualRatePercent: Number(value.annualRatePercent.trim()),
     annualRate: Number(value.annualRatePercent.trim()) / 100,
     years: yearsFromUnit(Number(value.time.trim()), timeUnit),
