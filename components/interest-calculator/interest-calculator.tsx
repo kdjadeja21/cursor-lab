@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createContext, use, useId, type ReactNode } from "react"
+import { createContext, use, useId, useState, type ReactNode } from "react"
 import { Controller, useForm, useWatch, type Control } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -147,7 +147,7 @@ export function InterestCalculator() {
     <InterestCalculatorProvider>
       <div className="grid gap-8 md:grid-cols-2 md:items-start">
         <InterestCalculatorForm />
-        <div aria-live="polite" className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
           <InterestCalculatorSummary />
           <InterestCalculatorSchedule />
         </div>
@@ -163,15 +163,10 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
     mode: "onTouched",
     reValidateMode: "onChange",
   })
+  // Results are computed only when Calculate is submitted, so typing never recalculates.
+  const [result, setResult] = useState<InterestResult | null>(null)
   const values = useWatch({ control: form.control })
-  const formValue: InterestFormInput = {
-    principal: values.principal ?? "",
-    annualRatePercent: values.annualRatePercent ?? "",
-    time: values.time ?? "",
-    timeUnit: values.timeUnit ?? "",
-    method: values.method ?? "",
-    frequency: values.frequency ?? "",
-  }
+  const method: InterestFormInput["method"] = values.method ?? ""
   const baseId = useId()
   const fieldIds: InterestCalculatorMeta["fieldIds"] = {
     principal: `${baseId}-principal`,
@@ -183,8 +178,8 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
   }
   const value: InterestCalculatorContextValue = {
     state: {
-      result: resultFromForm(formValue),
-      method: formValue.method,
+      result,
+      method,
       showAllErrors: form.formState.isSubmitted,
     },
     actions: {
@@ -225,7 +220,14 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
         }
       },
       submit: () => {
-        void form.handleSubmit(() => undefined)()
+        void form.handleSubmit(
+          (submitted) => {
+            setResult(resultFromForm(submitted))
+          },
+          () => {
+            setResult(null)
+          },
+        )()
       },
     },
     meta: {
@@ -426,7 +428,7 @@ function InterestCalculatorSummary() {
         <EmptyHeader>
           <EmptyTitle>No results yet</EmptyTitle>
           <EmptyDescription>
-            Enter a principal, rate, and time to see interest.
+            Fill in the form and choose Calculate to see interest.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -442,6 +444,10 @@ function InterestCalculatorSummary() {
       <h2 id={headingId} className="text-lg font-semibold">
         Results
       </h2>
+      {/* One short announcement, only when Calculate produces a result. */}
+      <p role="status" className="sr-only">
+        {`Interest earned ${formatUsd(result.interestEarned)}, final amount ${formatUsd(result.finalAmount)}.`}
+      </p>
       <p className="text-sm text-muted-foreground">{result.detail}</p>
       {result.tooLarge ? (
         <p role="note" className="text-sm font-medium text-destructive">
