@@ -1,0 +1,15 @@
+<!-- sources: impeccable=d631a8827f99414d2b6daba4ef08b7f8701751d7 composition-patterns=063bee94c3f4df8453406c830b0a7df0f2860278 react-best-practices=063bee94c3f4df8453406c830b0a7df0f2860278 shadcn=6ea090075cd537d3b792c6c1a625e2448b6ede26 cursor-team-kit=ccb5507cec1546dc88135c1139c811e6c59115ba -->
+Precedence (strict rank; higher wins): 1 ticket acceptance criteria > 2 react-best-practices (perf/correctness) > 3 composition-patterns (structure) > 4 shadcn (component choice) > 5 impeccable (visual, tokens only) > 6 patterns.md (theme, only if in scope). Pointers only; open the file when its rule applies.
+Guardrails (pass/fail): imports at file top; exhaustive switch with never default; lint and build pass; no hard-coded colors; no edits to shadcn component internals. Files: `.cursor/rules/no-inline-imports.mdc`, `.cursor/rules/typescript-exhaustive-switch.mdc`
+shadcn use: use components, not custom markup; check components/ui first, add with the CLI -> `.cursor/skills/shadcn/rules/composition.md`
+shadcn styling: semantic tokens, cva and cn(), no raw colors, no internals edits -> `.cursor/skills/shadcn/rules/styling.md`
+shadcn forms: Field/FieldGroup with react-hook-form and zod -> `.cursor/skills/shadcn/rules/forms.md`
+composition: compound components, no boolean-prop sprawl -> `.cursor/skills/composition-patterns/rules/architecture-avoid-boolean-props.md`, `.cursor/skills/composition-patterns/rules/architecture-compound-components.md`
+state: generic context interface, state in a provider -> `.cursor/skills/composition-patterns/rules/state-context-interface.md`
+react 19: no forwardRef, ref is a prop -> `.cursor/skills/composition-patterns/rules/react19-no-forwardref.md`
+waterfalls: parallel fetches, deferred await, Suspense streaming -> `.cursor/skills/react-best-practices/rules/async-parallel.md`, `.cursor/skills/react-best-practices/rules/async-defer-await.md`, `.cursor/skills/react-best-practices/rules/async-suspense-boundaries.md`
+bundle size: direct imports, no barrels, dynamic import for heavy client code -> `.cursor/skills/react-best-practices/rules/bundle-barrel-imports.md`, `.cursor/skills/react-best-practices/rules/bundle-dynamic-imports.md`
+server vs client: server by default, parallel fetching, React.cache, minimal props across the boundary -> `.cursor/skills/react-best-practices/rules/server-parallel-fetching.md`, `.cursor/skills/react-best-practices/rules/server-cache-react.md`, `.cursor/skills/react-best-practices/rules/server-serialization.md`
+re-render hygiene: derive during render, no effect for derived state, transitions for non-urgent updates -> `.cursor/skills/react-best-practices/rules/rerender-derived-state-no-effect.md`, `.cursor/skills/react-best-practices/rules/rerender-transitions.md`
+mutations: Server Actions with useActionState and useOptimistic; authenticate actions -> `.cursor/skills/react-best-practices/rules/server-auth-actions.md`
+visual: typography, spacing, color, motion, a11y through theme tokens only -> `.cursor/skills/impeccable/SKILL.md`
