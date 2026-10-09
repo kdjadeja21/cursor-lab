@@ -25,6 +25,16 @@ const usd = new Intl.NumberFormat("en-US", {
   currency: "USD",
 })
 
+// Above this, doubles can no longer represent whole cents exactly.
+export const MAX_EXACT_AMOUNT = 1_000_000_000_000_000
+
+const compactUsd = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "scientific",
+  maximumFractionDigits: 3,
+})
+
 const countFormat = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 })
@@ -75,6 +85,8 @@ export interface InterestResult {
   interestEarned: number
   finalAmount: number
   detail: string
+  /** True when any displayed amount is too large to show exactly to the cent. */
+  tooLarge: boolean
   rows: InterestYearRow[]
 }
 
@@ -154,11 +166,21 @@ export function calculateInterest(input: InterestCalculation): InterestResult {
     interestEarned: finalAmount - input.principal,
     finalAmount,
     detail: describeCalculation(input),
+    tooLarge:
+      !Number.isFinite(finalAmount) ||
+      rows.some((row) => Math.abs(row.endBalance) >= MAX_EXACT_AMOUNT) ||
+      Math.abs(finalAmount) >= MAX_EXACT_AMOUNT,
     rows,
   }
 }
 
 export function formatUsd(amount: number): string {
+  if (!Number.isFinite(amount)) {
+    return "Too large"
+  }
+  if (Math.abs(amount) >= MAX_EXACT_AMOUNT) {
+    return compactUsd.format(amount)
+  }
   return usd.format(amount)
 }
 

@@ -207,6 +207,10 @@ function InterestCalculatorProvider({ children }: { children: ReactNode }) {
             return
           case "timeUnit":
             form.setValue("timeUnit", fieldValue as InterestFormInput["timeUnit"], options)
+            // The 100-year limit depends on the unit, so revalidate the time field too.
+            if (form.getValues("time") !== "") {
+              void form.trigger("time")
+            }
             return
           case "method":
             form.setValue("method", fieldValue as InterestFormInput["method"], options)
@@ -383,8 +387,6 @@ function ChoiceField({
             <ToggleGroup
               aria-labelledby={meta.fieldIds[name]}
               aria-describedby={describedBy}
-              aria-required="true"
-              aria-invalid={showError ? true : undefined}
               variant="outline"
               size="lg"
               spacing={2}
@@ -392,6 +394,10 @@ function ChoiceField({
               value={field.value ? [field.value] : []}
               onBlur={field.onBlur}
               onValueChange={(next) => {
+                // Single-select: ignore empty changes so clicking the selected item keeps it selected.
+                if (next.length === 0) {
+                  return
+                }
                 assignChoice(name, next[0], actions.updateField)
               }}
             >
@@ -437,6 +443,12 @@ function InterestCalculatorSummary() {
         Results
       </h2>
       <p className="text-sm text-muted-foreground">{result.detail}</p>
+      {result.tooLarge ? (
+        <p role="note" className="text-sm font-medium text-destructive">
+          Result too large to display accurately. Amounts are shown in
+          scientific notation and are approximate.
+        </p>
+      ) : null}
       <dl className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <dt className="text-sm text-muted-foreground">Interest earned</dt>
