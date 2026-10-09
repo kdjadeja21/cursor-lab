@@ -5,7 +5,7 @@ Output exactly this structure. Omit nothing; write "none" for empty sections.
 ```
 # Audit: <PR title> (#<n> @ <head sha>)
 Verdict: APPROVE | REQUEST CHANGES | BLOCKED
-Reviewed by: <model>   Rules digest: <sha>   CI: <status>
+Reviewed by: pr-auditor   Rules digest: <sha>   CI: <status>
 
 ## Intent
 <what the PR claims>
