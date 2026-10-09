@@ -16,7 +16,7 @@ export function WorksWhere() {
   return (
     <section
       id="works"
-      className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-20"
+      className="mx-auto flex w-full max-w-6xl scroll-mt-24 flex-col gap-10 px-6 py-20"
     >
       <div className="flex max-w-2xl flex-col gap-3">
         <h2 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">

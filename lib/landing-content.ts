@@ -116,33 +116,3 @@ export const navLinks = [
   { label: "Jobs", href: "#jobs" },
   { label: "Guides", href: "#guides" },
 ] as const
-
-export type Platform = "macos" | "ios"
-
-export const downloadPlatforms = ["macos", "ios"] as const satisfies readonly Platform[]
-
-export function platformLabel(platform: Platform): string {
-  switch (platform) {
-    case "macos":
-      return "macOS Apple silicon"
-    case "ios":
-      return "iOS"
-    default: {
-      const unreachable: never = platform
-      return unreachable
-    }
-  }
-}
-
-export function platformVariant(platform: Platform): "default" | "outline" {
-  switch (platform) {
-    case "macos":
-      return "default"
-    case "ios":
-      return "outline"
-    default: {
-      const unreachable: never = platform
-      return unreachable
-    }
-  }
-}

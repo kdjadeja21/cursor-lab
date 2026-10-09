@@ -10,7 +10,7 @@ import { WorksWhere } from "@/components/landing/works-where"
 
 export default function Home() {
   return (
-    <div className="bg-radial-glow flex flex-1 flex-col">
+    <div className="landing dark bg-radial-glow flex min-h-full flex-1 flex-col">
       <SiteHeader />
       <main className="flex flex-1 flex-col">
         <Hero />

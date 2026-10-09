@@ -14,14 +14,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AI teammates that finish the work | Grok Bot",
-  description: "AI teammates that finish the work",
+  description:
+    "Give tasks to Bots like you would a teammate on desktop or iOS. They take projects from start to end, keep context on how you work, and come back when your approval is needed.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

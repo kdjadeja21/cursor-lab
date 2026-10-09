@@ -41,11 +41,6 @@ export function TeachAndMemory() {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
-            <CardHeader>
-              <CardTitle>
-                <h3>{memory.role}</h3>
-              </CardTitle>
-            </CardHeader>
             <CardContent>
               <p className="leading-relaxed">{memory.reply}</p>
             </CardContent>
