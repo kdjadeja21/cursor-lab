@@ -16,7 +16,8 @@ export default function InterestCalculatorPage() {
           <h1 className="text-3xl font-semibold tracking-tight">Interest calculator</h1>
           <p className="text-muted-foreground">
             Compare simple and compound interest. Enter a principal, an annual rate, and a
-            time period. Results stay empty until those inputs are valid.
+            time period. Results appear after you choose Calculate. Editing the inputs doesn&apos;t
+            update them until you press Calculate again.
           </p>
         </header>
         {/* Suspense skipped: this page has no async data, so there is no fallback to show. */}
