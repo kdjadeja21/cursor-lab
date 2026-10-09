@@ -36,7 +36,9 @@ export const productPoints = [
   },
 ] as const
 
-export const openTimes = [
+export const exampleSlotsLabel = "Example"
+
+export const exampleOpenTimes = [
   { day: "Tuesday", times: ["9:00", "9:30", "10:00"] },
   { day: "Wednesday", times: ["13:00", "14:30"] },
 ] as const

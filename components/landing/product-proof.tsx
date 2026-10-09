@@ -1,7 +1,12 @@
-import { openTimes, productPoints } from "@/components/landing/copy"
+import {
+  exampleOpenTimes,
+  exampleSlotsLabel,
+  productPoints,
+} from "@/components/landing/copy"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -26,9 +31,12 @@ export function ProductProof() {
               <h3>Your booking page</h3>
             </CardTitle>
             <CardDescription>Open times on the link you share.</CardDescription>
+            <CardAction>
+              <Badge variant="secondary">{exampleSlotsLabel}</Badge>
+            </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            {openTimes.map((day) => (
+            {exampleOpenTimes.map((day) => (
               <div key={day.day} className="flex flex-col gap-2">
                 <p className="text-sm font-medium text-foreground">{day.day}</p>
                 <ul className="flex flex-wrap gap-2">
@@ -42,7 +50,6 @@ export function ProductProof() {
             ))}
           </CardContent>
         </Card>
-        {/* Product points use Card: shadcn composition outranks Impeccable's anti-card default. */}
         <ul className="flex flex-col gap-4">
           {productPoints.map((point) => (
             <li key={point.title}>

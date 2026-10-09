@@ -7,7 +7,7 @@ import { LinkButton } from "@/components/landing/link-button"
 export function SiteFrame({ children }: { children: ReactNode }) {
   return (
     <div className="bg-dots flex min-h-full flex-1 flex-col">
-      <header className="sticky top-0 bg-background">
+      <header className="sticky top-0 z-10 bg-background">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/"
@@ -16,13 +16,28 @@ export function SiteFrame({ children }: { children: ReactNode }) {
             Slotly
           </Link>
           <nav aria-label="Account" className="flex flex-wrap items-center gap-2">
-            <LinkButton href="/sign-in" variant="ghost" size="sm">
+            <LinkButton
+              href="/sign-in"
+              variant="ghost"
+              size="sm"
+              className="h-11 px-3 sm:h-7 sm:px-2.5"
+            >
               Sign in
             </LinkButton>
-            <LinkButton href="/sign-up" variant="outline" size="sm">
+            <LinkButton
+              href="/sign-up"
+              variant="outline"
+              size="sm"
+              className="h-11 px-3 sm:h-7 sm:px-2.5"
+            >
               Sign up
             </LinkButton>
-            <LinkButton href="/profile" variant="ghost" size="sm">
+            <LinkButton
+              href="/profile"
+              variant="ghost"
+              size="sm"
+              className="h-11 px-3 sm:h-7 sm:px-2.5"
+            >
               Profile
             </LinkButton>
           </nav>

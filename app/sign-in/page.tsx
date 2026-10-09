@@ -11,7 +11,7 @@ export default function SignInPage() {
   return (
     <SiteFrame>
       <RouteNote title="Sign in">
-        You opened the sign-in link from the Slotly home page.
+        Sign in is coming soon.
       </RouteNote>
     </SiteFrame>
   )

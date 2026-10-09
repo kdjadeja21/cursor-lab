@@ -19,7 +19,6 @@ export function HowItWorks() {
           Set your hours, share the link, and they book a time on your calendar.
         </p>
       </div>
-      {/* Steps use Card: shadcn composition outranks Impeccable's anti-card default. */}
       <ol className="grid gap-4 md:grid-cols-3">
         {steps.map((step) => (
           <li key={step.label}>

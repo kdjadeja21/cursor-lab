@@ -11,7 +11,7 @@ export default function ProfilePage() {
   return (
     <SiteFrame>
       <RouteNote title="Profile">
-        Profile is where the link you share belongs.
+        Profile is coming soon.
       </RouteNote>
     </SiteFrame>
   )

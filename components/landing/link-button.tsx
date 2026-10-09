@@ -1,13 +1,14 @@
-import type { ComponentProps, ReactNode } from "react"
+import type { ReactNode } from "react"
+import type { VariantProps } from "class-variance-authority"
 import Link from "next/link"
 
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
-type LinkButtonProps = {
+type LinkButtonProps = VariantProps<typeof buttonVariants> & {
   href: string
   children: ReactNode
-  variant?: ComponentProps<typeof Button>["variant"]
-  size?: ComponentProps<typeof Button>["size"]
+  className?: string
 }
 
 export function LinkButton({
@@ -15,15 +16,14 @@ export function LinkButton({
   children,
   variant = "default",
   size = "default",
+  className,
 }: LinkButtonProps) {
   return (
-    <Button
-      nativeButton={false}
-      render={<Link href={href} />}
-      variant={variant}
-      size={size}
+    <Link
+      href={href}
+      className={cn(buttonVariants({ variant, size }), className)}
     >
       {children}
-    </Button>
+    </Link>
   )
 }

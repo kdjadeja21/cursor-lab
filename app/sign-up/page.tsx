@@ -11,7 +11,7 @@ export default function SignUpPage() {
   return (
     <SiteFrame>
       <RouteNote title="Sign up">
-        Get started here. This is the page behind the link you share once you have one.
+        Sign up is coming soon.
       </RouteNote>
     </SiteFrame>
   )
