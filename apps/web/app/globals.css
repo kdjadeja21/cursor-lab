@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f3efe6;
-  --ink: #1c1915;
-  --muted: #5e564c;
-  --line: #d9d1c3;
-  --paper: #fffdf8;
-  --signal: #1f6b45;
-  --signal-ink: #f3fff7;
-  --danger: #9a3412;
-  --shadow: 0 18px 50px rgb(28 25 21 / 8%);
+  --bg: #ececea;
+  --ink: #121212;
+  --muted: #4e514c;
+  --line: #d8d8d3;
+  --paper: #ffffff;
+  --soft: #f6f6f4;
+  --danger: #9f2d2d;
+  --danger-bg: #fff1f0;
+  --code: #141414;
+  --code-ink: #eceae4;
+  --code-muted: #a39e93;
+  --shadow: 0 1px 0 rgb(18 18 18 / 4%);
 }
 
 @theme inline {
@@ -18,9 +21,12 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-paper: var(--paper);
-  --color-signal: var(--signal);
-  --color-signal-ink: var(--signal-ink);
+  --color-soft: var(--soft);
   --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-code: var(--code);
+  --color-code-ink: var(--code-ink);
+  --color-code-muted: var(--code-muted);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
@@ -38,51 +44,204 @@ select {
   font: inherit;
 }
 
-.shell {
-  min-height: 100vh;
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
 }
 
-.topbar,
-.command,
-.panel {
+legend {
+  padding: 0;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.rail {
+  background: var(--soft);
+  border-bottom: 1px solid var(--line);
+}
+
+.editor,
+.output {
   background: var(--paper);
-  border: 1px solid var(--line);
 }
 
-.topbar,
-.command {
-  box-shadow: var(--shadow);
+.output {
+  border-top: 1px solid var(--line);
 }
 
-.step-current {
-  background: var(--ink);
-  color: var(--paper);
+.rail-presets,
+.rail-sections {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
 }
 
-.choice {
-  border: 1px solid var(--line);
-  background: transparent;
+.rail-presets > button {
+  flex: 0 0 16rem;
 }
 
-.choice[aria-pressed="true"] {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--paper);
+.rail-sections > button {
+  flex: 0 0 auto;
+  width: auto;
 }
 
-.swatch {
-  width: 0.85rem;
-  height: 0.85rem;
-  border-radius: 999px;
-  border: 1px solid rgb(28 25 21 / 20%);
+.preview-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 32rem;
 }
 
-.file-tree button[aria-current="true"] {
-  background: var(--ink);
-  color: var(--paper);
+.preview-split {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
-pre.preview {
+.file-list {
+  max-height: 12rem;
+  overflow: auto;
+  border-bottom: 1px solid var(--line);
+}
+
+.code-view {
+  min-height: 18rem;
+  overflow: auto;
+  margin: 0;
+  padding: 1rem;
+  background: var(--code);
+  color: var(--code-ink);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  tab-size: 2;
+}
+
+.command-text {
+  max-height: 4.6rem;
+  overflow: auto;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  border-radius: 0.5rem;
+  background: var(--code);
+  color: var(--code-ink);
+  padding: 0.75rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+input[type="range"] {
+  appearance: none;
+  height: 2px;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--line);
+  accent-color: var(--ink);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+@media (min-width: 1180px) {
+  .app-shell {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .app-body {
+    display: grid;
+    grid-template-columns: 248px minmax(0, 1fr) minmax(420px, 520px);
+    flex: 1;
+    min-height: 0;
+  }
+
+  .rail,
+  .editor {
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .rail {
+    border-bottom: 0;
+    border-right: 1px solid var(--line);
+  }
+
+  .rail-presets,
+  .rail-sections {
+    display: grid;
+    gap: 0.25rem;
+    overflow: visible;
+  }
+
+  .rail-presets > button,
+  .rail-sections > button {
+    flex: none;
+    width: 100%;
+  }
+
+  .output {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+
+  .preview-pane {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .preview-split {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .file-list {
+    max-height: 8.5rem;
+    border-bottom: 1px solid var(--line);
+    border-right: 0;
+  }
+
+  .code-view {
+    min-height: 0;
+    flex: 1;
+  }
 }

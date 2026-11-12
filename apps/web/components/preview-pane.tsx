@@ -1,61 +1,143 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import type { SeedlayerConfig } from "@seedlayer/core";
+import { useEffect, useMemo, useState } from "react";
+import { DesignLook } from "@/components/design-look";
 import type { PreviewFile } from "@/lib/types";
 
-export function PreviewPane({ files }: { files: PreviewFile[] }) {
+const JUMPS = [
+  "AGENTS.md",
+  "DESIGN.md",
+  "app/tokens.css",
+  "BRANCHING.md",
+  "CODE_STYLE.md",
+] as const;
+
+export function PreviewPane({
+  files,
+  design,
+  projectName,
+  showLook,
+}: {
+  files: PreviewFile[];
+  design: SeedlayerConfig["design"];
+  projectName: string;
+  showLook: boolean;
+}) {
+  const [tab, setTab] = useState<"files" | "look">(showLook ? "look" : "files");
+  const [query, setQuery] = useState("");
   const [selected, setSelected] = useState("AGENTS.md");
-  const current = files.find((file) => file.path === selected) ?? files[0];
+
+  useEffect(() => {
+    setTab(showLook ? "look" : "files");
+  }, [showLook]);
+
+  const current =
+    files.find((file) => file.path === selected) ??
+    files.find((file) => file.path === "AGENTS.md") ??
+    files[0];
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const matched = needle
+      ? files.filter((file) => file.path.toLowerCase().includes(needle))
+      : files;
+    return groupFiles(matched);
+  }, [files, query]);
   const agents = files.find((file) => file.path === "AGENTS.md");
-  const tree = useMemo(() => groupFiles(files), [files]);
 
   return (
-    <div className="panel flex min-h-[32rem] flex-col">
-      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">Preview</p>
-        <div className="flex gap-2">
-          <Jump label="AGENTS.md" onClick={() => setSelected("AGENTS.md")} />
-          <Jump label="tokens.css" onClick={() => setSelected("app/tokens.css")} />
-        </div>
+    <div className="preview-pane">
+      <div className="flex items-center gap-2 border-b border-line px-3 py-2">
+        <TabButton label="Files" pressed={tab === "files"} onClick={() => setTab("files")} />
+        <TabButton label="Look" pressed={tab === "look"} onClick={() => setTab("look")} />
+        <span className="ml-auto font-mono text-[11px] text-muted">
+          {tab === "files" && current?.path === "AGENTS.md" && agents
+            ? `${lineCount(agents.contents)} / 80 lines`
+            : `${files.length} files`}
+        </span>
       </div>
-      <div className="grid min-h-0 flex-1 md:grid-cols-[11rem_1fr]">
-        <div className="file-tree max-h-80 overflow-auto border-b border-line p-3 md:max-h-none md:border-r md:border-b-0">
-          {tree.map((group) => (
-            <div key={group.label} className="mb-3">
-              <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.12em] text-muted">
-                {group.label}
-              </p>
-              {group.files.map((file) => (
+      {tab === "look" ? (
+        <div className="min-h-0 flex-1 overflow-auto bg-soft">
+          <DesignLook design={design} projectName={projectName} />
+        </div>
+      ) : (
+        <div className="preview-split min-h-0 flex-1">
+          <div className="file-list bg-soft">
+            <input
+              className="w-full border-b border-line bg-transparent px-3 py-2 font-mono text-xs"
+              value={query}
+              placeholder="Filter files"
+              aria-label="Filter files"
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            <div className="flex gap-1 overflow-x-auto px-2 py-2">
+              {JUMPS.filter((path) => files.some((file) => file.path === path)).map((path) => (
                 <button
-                  key={file.path}
+                  key={path}
                   type="button"
-                  aria-current={file.path === current?.path}
-                  className="block w-full truncate rounded px-2 py-1 text-left font-mono text-xs"
-                  onClick={() => setSelected(file.path)}
+                  className="shrink-0 rounded border border-line bg-paper px-2 py-1 font-mono text-[10px]"
+                  onClick={() => {
+                    setSelected(path);
+                    setQuery("");
+                  }}
                 >
-                  {file.label}
+                  {path.split("/").at(-1)}
                 </button>
               ))}
             </div>
-          ))}
+            {visible.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-muted">No files match.</p>
+            ) : (
+              visible.map((group) => (
+                <div key={group.label} className="mb-2">
+                  <p className="px-3 py-1 font-mono text-[10px] tracking-wide text-muted">
+                    {group.label}
+                  </p>
+                  {group.files.map((file) => (
+                    <button
+                      key={file.path}
+                      type="button"
+                      aria-current={file.path === current?.path ? "true" : undefined}
+                      className={`block w-full truncate px-3 py-1 text-left font-mono text-xs ${
+                        file.path === current?.path ? "bg-ink text-paper" : "hover:bg-paper"
+                      }`}
+                      onClick={() => setSelected(file.path)}
+                    >
+                      {file.name}
+                    </button>
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-code">
+            <p className="shrink-0 truncate border-b border-white/10 px-4 py-2 font-mono text-[11px] text-code-muted">
+              {current?.path ?? "No file"}
+            </p>
+            <pre className="code-view">{current?.contents ?? ""}</pre>
+          </div>
         </div>
-        <div className="min-w-0 p-4">
-          <p className="mb-2 font-mono text-xs text-muted">
-            {current?.path}
-            {agents && current?.path === "AGENTS.md"
-              ? ` · ${lineCount(agents.contents)} lines`
-              : ""}
-          </p>
-          <pre className="preview font-mono text-xs leading-5">{current?.contents}</pre>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
-function Jump({ label, onClick }: { label: string; onClick: () => void }) {
+function TabButton({
+  label,
+  pressed,
+  onClick,
+}: {
+  label: string;
+  pressed: boolean;
+  onClick: () => void;
+}) {
   return (
-    <button type="button" className="choice rounded-full px-3 py-1 text-xs" onClick={onClick}>
+    <button
+      type="button"
+      aria-pressed={pressed}
+      className={`rounded-md px-3 py-1 text-sm ${pressed ? "bg-ink text-paper" : "text-muted hover:bg-soft"}`}
+      onClick={onClick}
+    >
       {label}
     </button>
   );
@@ -67,15 +149,23 @@ function lineCount(contents: string): number {
 
 function groupFiles(
   files: PreviewFile[],
-): Array<{ label: string; files: Array<{ path: string; label: string }> }> {
-  const groups = new Map<string, Array<{ path: string; label: string }>>();
+): Array<{ label: string; files: Array<{ path: string; name: string }> }> {
+  const groups = new Map<string, Array<{ path: string; name: string }>>();
   for (const file of files) {
     const slash = file.path.lastIndexOf("/");
     const label = slash === -1 ? "root" : file.path.slice(0, slash);
-    const name = slash === -1 ? file.path : file.path.slice(slash + 1);
     const list = groups.get(label) ?? [];
-    list.push({ path: file.path, label: name });
+    list.push({ path: file.path, name: slash === -1 ? file.path : file.path.slice(slash + 1) });
     groups.set(label, list);
   }
-  return [...groups.entries()].map(([label, entries]) => ({ label, files: entries }));
+  return [...groups.entries()]
+    .sort((left, right) => {
+      if (left[0] === "root") return -1;
+      if (right[0] === "root") return 1;
+      return left[0] < right[0] ? -1 : 1;
+    })
+    .map(([label, entries]) => ({
+      label,
+      files: entries.sort((left, right) => (left.path < right.path ? -1 : 1)),
+    }));
 }

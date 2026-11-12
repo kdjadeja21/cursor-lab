@@ -7,11 +7,12 @@ import {
 } from "@seedlayer/core";
 import { listPresets, loadCatalog, loadPreset } from "@seedlayer/packs";
 import { Configurator } from "@/components/configurator";
+import { isSection } from "@/lib/labels";
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ c?: string; name?: string }>;
+  searchParams: Promise<{ c?: string; name?: string; s?: string }>;
 }) {
   const params = await searchParams;
   let error: string | null = null;
@@ -39,6 +40,7 @@ export default async function Page({
       initialName={projectName}
       initialFiles={files}
       initialError={error}
+      initialSection={isSection(params.s) ? params.s : "stack"}
     />
   );
 }

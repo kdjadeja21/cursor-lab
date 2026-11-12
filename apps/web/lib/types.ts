@@ -2,4 +2,7 @@ import type { SeedlayerConfig } from "@seedlayer/core";
 
 export type PreviewFile = { path: string; contents: string };
 
-export type PresetOption = { id: string; config: SeedlayerConfig };
+export type PresetOption = {
+  id: Exclude<SeedlayerConfig["preset"], "custom">;
+  config: SeedlayerConfig;
+};
