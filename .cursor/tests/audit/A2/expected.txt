@@ -1,0 +1,6 @@
+# pattern|file:line the report must mention
+forwardRef|Panel.tsx:3
+useEffect|Panel.tsx:15
+#1a1a2e|Panel.tsx:20
+type PanelProps|Panel.tsx:5
+<button className|Panel.tsx:21
