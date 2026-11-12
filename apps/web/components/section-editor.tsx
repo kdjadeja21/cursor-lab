@@ -284,7 +284,7 @@ function PaletteField({
               type="button"
               aria-pressed={on}
               className={`flex min-h-32 flex-col justify-between rounded-lg border p-3 text-left ${
-                on ? "ring-2 ring-ink" : ""
+                on ? "ring-2 ring-accent ring-offset-2 ring-offset-bg" : ""
               }`}
               style={{ background: tokens.bg, color: tokens.fg, borderColor: tokens.border }}
               onClick={() => onChange({ ...value, palette: palette.value })}

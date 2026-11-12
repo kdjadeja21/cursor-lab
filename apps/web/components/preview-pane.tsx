@@ -99,7 +99,7 @@ export function PreviewPane({
                       type="button"
                       aria-current={file.path === current?.path ? "true" : undefined}
                       className={`block w-full truncate px-3 py-1 text-left font-mono text-xs ${
-                        file.path === current?.path ? "bg-ink text-paper" : "hover:bg-paper"
+                        file.path === current?.path ? "bg-accent text-accent-fg" : "hover:bg-paper"
                       }`}
                       onClick={() => setSelected(file.path)}
                     >
@@ -135,7 +135,7 @@ function TabButton({
     <button
       type="button"
       aria-pressed={pressed}
-      className={`rounded-md px-3 py-1 text-sm ${pressed ? "bg-ink text-paper" : "text-muted hover:bg-soft"}`}
+      className={`rounded-md px-3 py-1 text-sm ${pressed ? "bg-accent text-accent-fg" : "text-muted hover:bg-soft"}`}
       onClick={onClick}
     >
       {label}

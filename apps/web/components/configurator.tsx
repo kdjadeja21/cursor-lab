@@ -14,6 +14,7 @@ import {
   type SectionId,
   sectionValue,
 } from "@/lib/labels";
+import { appTheme } from "@/lib/theme";
 import type { PresetOption, PreviewFile } from "@/lib/types";
 
 export function Configurator({
@@ -92,10 +93,10 @@ export function Configurator({
       : `${files.length} files`;
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={appTheme(config.design)}>
       <header className="flex flex-col gap-3 border-b border-line bg-paper px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div className="flex items-baseline gap-3">
-          <p className="font-serif text-[1.7rem] leading-none">Seedlayer</p>
+          <p className="font-serif text-[1.7rem] leading-none text-accent">Seedlayer</p>
           <p className="hidden text-sm text-muted md:block">{presetLabel(config.preset)}</p>
         </div>
         <label className="flex min-w-0 items-center gap-2 text-sm sm:w-64">
@@ -139,7 +140,7 @@ export function Configurator({
                     type="button"
                     aria-pressed={active}
                     className={`rounded-lg border px-3 py-2 text-left ${
-                      active ? "border-ink bg-paper" : "border-transparent hover:bg-paper"
+                      active ? "border-accent bg-paper" : "border-transparent hover:bg-paper"
                     }`}
                     onClick={() => setConfig(preset.config)}
                   >
@@ -164,13 +165,13 @@ export function Configurator({
                     type="button"
                     aria-current={active ? "page" : undefined}
                     className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm ${
-                      active ? "bg-ink text-paper" : "hover:bg-paper"
+                      active ? "bg-accent text-accent-fg" : "hover:bg-paper"
                     }`}
                     onClick={() => setSection(item.id)}
                   >
                     <span className="font-medium">{item.label}</span>
                     <span
-                      className={`truncate font-mono text-[11px] ${active ? "text-paper/70" : "text-muted"}`}
+                      className={`truncate font-mono text-[11px] ${active ? "text-accent-fg/70" : "text-muted"}`}
                     >
                       {sectionValue(config, item.id)}
                     </span>
@@ -196,7 +197,7 @@ export function Configurator({
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
-                className="rounded-md bg-ink px-3 py-2 text-sm text-paper"
+                className="rounded-md bg-accent px-3 py-2 text-sm text-accent-fg"
                 onClick={() => void copyValue(command, setCopied, "command")}
               >
                 {copied === "command" ? "Copied" : "Copy command"}

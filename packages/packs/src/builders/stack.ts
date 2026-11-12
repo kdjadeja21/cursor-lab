@@ -208,14 +208,30 @@ h1 {
   color: var(--color-muted-fg);
 }
 
-.token-button {
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
   margin-top: 1.5rem;
+}
+
+.token-button,
+.highlight-chip {
   border: 0;
   border-radius: var(--radius);
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
   padding: 0.625rem 1rem;
   font: inherit;
+}
+
+.token-button {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+
+.highlight-chip {
+  background: var(--color-highlight);
+  color: var(--color-highlight-fg);
 }
 `;
 }
@@ -279,9 +295,12 @@ function page(ctx: RenderContext): string {
         Colors, type, and spacing come from app/tokens.css. Do not hardcode a color when a token
         exists.
       </p>
-      <button className="token-button" type="button">
-        Continue
-      </button>
+      <div className="actions">
+        <button className="token-button" type="button">
+          Continue
+        </button>
+        <span className="highlight-chip">Highlight</span>
+      </div>
     </main>
   );
 }
@@ -298,7 +317,10 @@ export default function HomePage() {
         Colors, type, and spacing come from app/tokens.css. Do not hardcode a color when a token
         exists.
       </p>
-      <Button type="button">Continue</Button>
+      <div className="actions">
+        <Button type="button">Continue</Button>
+        <span className="highlight-chip">Highlight</span>
+      </div>
     </main>
   );
 }

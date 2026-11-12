@@ -33,13 +33,13 @@ export function Segmented<T extends string>({
               type="button"
               aria-pressed={on}
               className={`min-h-16 rounded-lg border px-3 py-2 text-left ${
-                on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:bg-soft"
+                on ? "border-accent bg-accent text-accent-fg" : "border-line bg-paper hover:bg-soft"
               }`}
               onClick={() => onChange(option.value)}
             >
               <span className="block text-sm font-medium">{option.label}</span>
               <span
-                className={`mt-1 block text-xs leading-4 ${on ? "text-paper/75" : "text-muted"}`}
+                className={`mt-1 block text-xs leading-4 ${on ? "text-accent-fg/75" : "text-muted"}`}
               >
                 {option.detail}
               </span>
@@ -79,7 +79,7 @@ export function ChoiceList<T extends string>({
               type="button"
               aria-pressed={on}
               className={`flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left ${
-                on ? "border-ink bg-soft" : "border-line bg-paper hover:bg-soft"
+                on ? "border-accent bg-soft" : "border-line bg-paper hover:bg-soft"
               }`}
               onClick={() => onSelect(option.value)}
             >
@@ -101,7 +101,9 @@ function Mark({ on, mode }: { on: boolean; mode: "one" | "many" }) {
     return (
       <span
         className={`mt-0.5 size-4 shrink-0 rounded-full border ${
-          on ? "border-ink bg-ink shadow-[inset_0_0_0_3px_var(--paper)]" : "border-line bg-paper"
+          on
+            ? "border-accent bg-accent shadow-[inset_0_0_0_3px_var(--paper)]"
+            : "border-line bg-paper"
         }`}
         aria-hidden="true"
       />
@@ -110,7 +112,7 @@ function Mark({ on, mode }: { on: boolean; mode: "one" | "many" }) {
   return (
     <span
       className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded-[4px] border text-[10px] leading-none ${
-        on ? "border-ink bg-ink text-paper" : "border-line bg-paper"
+        on ? "border-accent bg-accent text-accent-fg" : "border-line bg-paper"
       }`}
       aria-hidden="true"
     >

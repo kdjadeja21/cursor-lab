@@ -2,6 +2,7 @@
 
 import type { SeedlayerConfig } from "@seedlayer/core";
 import { designTokens } from "@seedlayer/core/tokens";
+import { themeFont } from "@/lib/theme";
 
 export function DesignLook({
   design,
@@ -11,7 +12,7 @@ export function DesignLook({
   projectName: string;
 }) {
   const tokens = designTokens(design);
-  const font = previewFont(design.fontSans);
+  const font = themeFont(design.fontSans);
   return (
     <div className="grid gap-3 p-4">
       <p className="text-xs text-muted">Light and dark from the same tokens.</p>
@@ -84,19 +85,4 @@ export function DesignLook({
       </article>
     </div>
   );
-}
-
-function previewFont(font: SeedlayerConfig["design"]["fontSans"]): string {
-  switch (font) {
-    case "Inter":
-      return "var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif";
-    case "Geist":
-      return "var(--font-geist), Geist, ui-sans-serif, system-ui, sans-serif";
-    case "system":
-      return "ui-sans-serif, system-ui, sans-serif";
-    default: {
-      const exhaustive: never = font;
-      return exhaustive;
-    }
-  }
 }
