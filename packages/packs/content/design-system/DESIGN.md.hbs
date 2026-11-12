@@ -1,0 +1,31 @@
+# Design
+
+Palette `{{config.design.palette}}`, radius `{{config.design.radius}}`, font `{{config.design.fontSans}}`, density `{{config.design.density}}`.
+
+## Tokens only
+
+Every color, radius, font, and section spacing value lives in `app/tokens.css`. Components reference those variables or the Tailwind colors mapped in `app/globals.css`.
+
+Do not hardcode hex, rgb, hsl, or okLch values in components, pages, or modules. If a value is missing, add a token first, then use it.
+
+`#fff`, `#ffffff`, `white`, and `black` count as hardcoded colors.
+
+## What to use
+
+- Page background and text: `--color-bg`, `--color-fg`
+- Secondary text and surfaces: `--color-muted`, `--color-muted-fg`
+- Lines: `--color-border`
+- Primary action: `--color-accent`, `--color-accent-fg`
+- Errors: `--color-danger`
+- Corners: `--radius`
+- Page padding: `--space-section`
+
+Dark mode overrides the same variable names. Do not add a second set of one-off colors for dark mode.
+
+## Components
+
+{{#if flags.shadcn}}
+shadcn components live in `components/ui`. Restyle them with tokens. The shadcn base color in `components.json` is only a starting point; `app/tokens.css` is the source of truth. The vivid palette keeps shadcn's neutral base and layers Seedlayer tokens on top.
+{{else}}
+This project does not install shadcn. Style elements with the token classes in `app/globals.css`.
+{{/if}}

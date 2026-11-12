@@ -1,0 +1,35 @@
+import { readFileSync } from "node:fs";
+
+const maxLines = {{config.codeStyle.maxFileLines}};
+const chunks = [];
+for await (const chunk of process.stdin) chunks.push(chunk);
+
+let payload = {};
+try {
+  payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+} catch {
+  process.stdout.write("{}\n");
+  process.exit(0);
+}
+
+const input = payload.tool_input ?? {};
+const filePath = payload.file_path ?? input.path ?? input.file_path ?? input.target_file;
+if (typeof filePath !== "string") {
+  process.stdout.write("{}\n");
+  process.exit(0);
+}
+
+let text = "";
+try {
+  text = readFileSync(filePath, "utf8");
+} catch {
+  text = typeof input.contents === "string" ? input.contents : "";
+}
+
+const lines = text.length === 0 ? 0 : text.split(/\r?\n/).length;
+if (lines > maxLines) {
+  const message = `${filePath} is ${lines} lines. The limit is ${maxLines}. Split the file before continuing.`;
+  process.stdout.write(`${JSON.stringify({ additional_context: message })}\n`);
+} else {
+  process.stdout.write("{}\n");
+}

@@ -1,0 +1,13 @@
+<!-- seedlayer:begin summary -->
+## What
+
+<!-- seedlayer:end summary -->
+
+## Checklist
+
+- [ ] Branch matches `{{config.git.branchPrefix}}<short-name>`
+- [ ] Diff is within {{config.git.maxPrLines}} lines, excluding lockfiles
+- [ ] Tests cover the change
+{{#if flags.prReview}}
+- [ ] A human reviewer is requested
+{{/if}}

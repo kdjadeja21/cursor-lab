@@ -1,0 +1,13 @@
+<!-- seedlayer:begin summary -->
+## What
+
+<!-- seedlayer:end summary -->
+
+## Checklist
+
+- [ ] Branch is short-lived and uses `{{config.git.branchPrefix}}`
+- [ ] Diff is within {{config.git.maxPrLines}} lines, excluding lockfiles
+- [ ] CI is green
+{{#if flags.prReview}}
+- [ ] Review requested because this change is risky
+{{/if}}

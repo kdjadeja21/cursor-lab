@@ -1,0 +1,26 @@
+{
+  "name": "workflow",
+  "version": "0.1.0",
+  "requires": ["agents-core"],
+  "conflicts": [],
+  "options": {},
+  "outputs": [
+    { "template": "plan.md.hbs", "to": ".cursor/commands/plan.md", "when": "agent:cursor+workflow:plan" },
+    { "template": "implement.md.hbs", "to": ".cursor/commands/implement.md", "when": "agent:cursor+workflow:implement" },
+    { "template": "review.md.hbs", "to": ".cursor/commands/review.md", "when": "agent:cursor+workflow:review" },
+    { "template": "plan.md.hbs", "to": ".claude/commands/plan.md", "when": "agent:claude-code+workflow:plan" },
+    { "template": "implement.md.hbs", "to": ".claude/commands/implement.md", "when": "agent:claude-code+workflow:implement" },
+    { "template": "review.md.hbs", "to": ".claude/commands/review.md", "when": "agent:claude-code+workflow:review" },
+    { "template": "plan.skill.md.hbs", "to": ".cursor/skills/plan/SKILL.md", "when": "agent:cursor+workflow:plan" },
+    { "template": "implement.skill.md.hbs", "to": ".cursor/skills/implement/SKILL.md", "when": "agent:cursor+workflow:implement" },
+    { "template": "review.skill.md.hbs", "to": ".cursor/skills/review/SKILL.md", "when": "agent:cursor+workflow:review" },
+    { "template": "plan.skill.md.hbs", "to": ".claude/skills/plan/SKILL.md", "when": "agent:claude-code+workflow:plan" },
+    { "template": "implement.skill.md.hbs", "to": ".claude/skills/implement/SKILL.md", "when": "agent:claude-code+workflow:implement" },
+    { "template": "review.skill.md.hbs", "to": ".claude/skills/review/SKILL.md", "when": "agent:claude-code+workflow:review" },
+    { "template": "mcp.json.hbs", "to": ".cursor/mcp.json", "when": "agent:cursor" },
+    { "template": "mcp.json.hbs", "to": ".mcp.json", "when": "agent:claude-code" },
+    { "template": "hooks.json.hbs", "to": ".cursor/hooks.json", "when": "agent:cursor" },
+    { "template": "line-limit.mjs.hbs", "to": ".cursor/hooks/line-limit.mjs", "when": "agent:cursor" }
+  ],
+  "agentRules": ["workflow"]
+}

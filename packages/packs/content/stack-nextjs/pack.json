@@ -1,0 +1,40 @@
+{
+  "name": "stack-nextjs",
+  "version": "0.1.0",
+  "requires": [],
+  "conflicts": [],
+  "options": {},
+  "outputs": [
+    { "template": "@build", "to": "package.json" },
+    { "template": "@build", "to": "tsconfig.json" },
+    { "template": "@build", "to": "next.config.ts" },
+    { "template": "@build", "to": "next-env.d.ts" },
+    { "template": "@build", "to": "postcss.config.mjs" },
+    { "template": "@build", "to": "app/globals.css" },
+    { "template": "@build", "to": "app/layout.tsx" },
+    { "template": "@build", "to": "app/page.tsx" },
+    { "template": "@build", "to": "lib/format-title.ts" },
+    { "template": "@build", "to": "lib/format-title.test.ts", "when": "stack.tests:vitest" },
+    { "template": "@build", "to": "lib/result.ts", "when": "codeStyle.errorHandling:result" },
+    { "template": "@build", "to": "lib/utils.ts", "when": "stack.components:shadcn" },
+    { "template": "@build", "to": "vitest.config.ts", "when": "stack.tests:vitest" },
+    { "template": "@build", "to": "components.json", "when": "stack.components:shadcn" },
+    {
+      "template": "@build",
+      "to": "components/ui/button.tsx",
+      "when": "stack.components:shadcn+codeStyle.naming:kebab-files"
+    },
+    {
+      "template": "@build",
+      "to": "components/ui/Button.tsx",
+      "when": "stack.components:shadcn+codeStyle.naming:pascal-components"
+    },
+    { "template": "@build", "to": ".gitignore" },
+    { "template": "README.md.hbs", "to": "README.md" },
+    { "template": "env.example.hbs", "to": ".env.example" },
+    { "template": "feature.md.hbs", "to": "features/README.md", "when": "codeStyle.folders:feature" },
+    { "template": "hooks.md.hbs", "to": "hooks/README.md", "when": "codeStyle.folders:type" },
+    { "template": "types.md.hbs", "to": "types/README.md", "when": "codeStyle.folders:type" }
+  ],
+  "agentRules": []
+}

@@ -1,0 +1,20 @@
+<!-- seedlayer:begin branching -->
+# Branching
+
+Workflow: GitHub Flow.
+
+## Branches
+
+- Branch from `main` as `{{config.git.branchPrefix}}<short-name>`.
+- `main` stays deployable. Ship by merging the pull request.
+
+## Pull requests
+
+- Open a pull request for every change.
+- Cap the diff at {{config.git.maxPrLines}} lines, excluding lockfiles.
+- At least one human review before merge.
+
+## Commits
+
+Use Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`.
+<!-- seedlayer:end branching -->

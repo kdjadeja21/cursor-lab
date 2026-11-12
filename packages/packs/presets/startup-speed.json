@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "preset": "startup-speed",
+  "stack": {
+    "framework": "nextjs",
+    "language": "typescript",
+    "styling": "tailwind",
+    "components": "shadcn",
+    "tests": "vitest",
+    "database": "none",
+    "auth": "none",
+    "hosting": "vercel"
+  },
+  "design": {
+    "palette": "neutral",
+    "radius": "md",
+    "fontSans": "Inter",
+    "density": "comfortable"
+  },
+  "codeStyle": {
+    "linter": "biome",
+    "strictness": "strict",
+    "maxFileLines": 300,
+    "folders": "feature",
+    "naming": "kebab-files",
+    "errorHandling": "throw"
+  },
+  "git": {
+    "workflow": "agent-safe",
+    "branchPrefix": "agent/",
+    "commits": "conventional",
+    "maxPrLines": 400
+  },
+  "agents": ["cursor", "claude-code"],
+  "workflow": ["plan", "implement", "review"],
+  "quality": ["husky", "commitlint", "ci", "pr-review"]
+}

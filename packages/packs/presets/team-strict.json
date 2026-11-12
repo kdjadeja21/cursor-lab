@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "preset": "team-strict",
+  "stack": {
+    "framework": "nextjs",
+    "language": "typescript",
+    "styling": "tailwind",
+    "components": "shadcn",
+    "tests": "vitest",
+    "database": "none",
+    "auth": "none",
+    "hosting": "vercel"
+  },
+  "design": {
+    "palette": "slate",
+    "radius": "sm",
+    "fontSans": "Geist",
+    "density": "compact"
+  },
+  "codeStyle": {
+    "linter": "eslint",
+    "strictness": "strict",
+    "maxFileLines": 200,
+    "folders": "type",
+    "naming": "pascal-components",
+    "errorHandling": "result"
+  },
+  "git": {
+    "workflow": "github-flow",
+    "branchPrefix": "feature/",
+    "commits": "conventional",
+    "maxPrLines": 250
+  },
+  "agents": ["cursor", "claude-code"],
+  "workflow": ["plan", "implement", "review"],
+  "quality": ["husky", "commitlint", "ci", "pr-review"]
+}

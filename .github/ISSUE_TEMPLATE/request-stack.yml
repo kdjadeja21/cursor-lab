@@ -1,0 +1,12 @@
+name: Request a stack
+description: Ask for a framework, database, auth, or hosting target.
+title: "stack: "
+labels: ["stack"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: What should Seedlayer generate?
+      description: Name the framework or service and the smallest useful output.
+    validations:
+      required: true

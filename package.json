@@ -1,26 +1,30 @@
 {
-  "name": "cursor-lab",
+  "name": "seedlayer",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+  "description": "Configure a project once and generate the app scaffold plus the AI context layer.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
   },
-  "dependencies": {
-    "next": "16.3.4",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r --filter ./packages/* build && pnpm --filter @seedlayer/web typecheck",
+    "test": "pnpm -r --filter ./packages/* build && pnpm -r --filter ./packages/* test",
+    "lint": "biome check .",
+    "dev": "pnpm --filter @seedlayer/core build && pnpm --filter @seedlayer/packs build && pnpm --filter @seedlayer/web dev",
+    "verify:generated": "node scripts/verify-presets.mjs",
+    "generate:example": "pnpm --filter @seedlayer/core build && pnpm --filter @seedlayer/packs build && pnpm --filter create-seedlayer build && node packages/cli/dist/bin.js examples/startup-speed --preset startup-speed --skip-install --force"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.4",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@biomejs/biome": "2.6.7",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
   }
 }

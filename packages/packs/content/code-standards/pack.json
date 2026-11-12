@@ -1,0 +1,16 @@
+{
+  "name": "code-standards",
+  "version": "0.1.0",
+  "requires": [],
+  "conflicts": [],
+  "options": {
+    "maxFileLines": { "type": "number", "default": 300, "from": "codeStyle.maxFileLines" }
+  },
+  "outputs": [
+    { "template": "CODE_STYLE.md.hbs", "to": "CODE_STYLE.md" },
+    { "template": "@build", "to": "biome.json", "when": "codeStyle.linter:biome" },
+    { "template": "@build", "to": "eslint.config.mjs", "when": "codeStyle.linter:eslint" },
+    { "template": "@build", "to": "scripts/check-file-size.mjs" }
+  ],
+  "agentRules": ["code-style"]
+}

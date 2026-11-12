@@ -1,0 +1,23 @@
+name: Bug in a pack
+description: A generated file or rule is wrong.
+title: "pack: "
+labels: ["pack"]
+body:
+  - type: input
+    id: preset
+    attributes:
+      label: Preset or config code
+    validations:
+      required: true
+  - type: input
+    id: pack
+    attributes:
+      label: Pack name
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should the generated repo have done?
+    validations:
+      required: true
