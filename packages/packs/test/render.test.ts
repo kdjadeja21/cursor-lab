@@ -48,7 +48,8 @@ test("presets differ where the product says they differ", () => {
   assert.equal(exists(hack, ".github/workflows/ci.yml"), true);
   assert.equal(exists(hack, ".cursor/commands/implement.md"), true);
   assert.equal(exists(hack, ".cursor/commands/plan.md"), false);
-  assert.match(file(hack, "app/tokens.css"), /#146c43/);
+  assert.match(file(hack, "app/tokens.css"), /#047857/);
+  assert.match(file(hack, "app/tokens.css"), /--color-highlight:/);
 });
 
 test("startup-speed matches the published preset id", () => {

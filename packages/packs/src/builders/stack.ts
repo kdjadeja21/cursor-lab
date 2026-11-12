@@ -1,4 +1,4 @@
-import { canonicalJson, type RenderContext } from "@seedlayer/core";
+import { canonicalJson, type RenderContext, type SeedlayerConfig } from "@seedlayer/core";
 
 const VERSIONS = {
   next: "16.3.4",
@@ -171,6 +171,8 @@ function globalsCss(): string {
   --color-border: var(--color-border);
   --color-accent: var(--color-accent);
   --color-accent-foreground: var(--color-accent-fg);
+  --color-highlight: var(--color-highlight);
+  --color-highlight-foreground: var(--color-highlight-fg);
   --color-danger: var(--color-danger);
   --font-sans: var(--font-sans);
   --radius-control: var(--radius);
@@ -426,8 +428,29 @@ export default defineConfig({
 `;
 }
 
+function shadcnBase(
+  palette: SeedlayerConfig["design"]["palette"],
+): "stone" | "slate" | "zinc" | "neutral" {
+  switch (palette) {
+    case "ink":
+    case "ember":
+      return "stone";
+    case "harbor":
+      return "slate";
+    case "iris":
+    case "dusk":
+      return "zinc";
+    case "grove":
+      return "neutral";
+    default: {
+      const exhaustive: never = palette;
+      return exhaustive;
+    }
+  }
+}
+
 function componentsJson(ctx: RenderContext): string {
-  const baseColor = ctx.config.design.palette === "vivid" ? "neutral" : ctx.config.design.palette;
+  const baseColor = shadcnBase(ctx.config.design.palette);
   return json({
     $schema: "https://ui.shadcn.com/schema.json",
     style: "new-york",

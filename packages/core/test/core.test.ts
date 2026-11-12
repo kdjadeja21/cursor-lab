@@ -27,7 +27,7 @@ const config = {
     hosting: "vercel",
   },
   design: {
-    palette: "neutral",
+    palette: "ink",
     radius: "md",
     fontSans: "Inter",
     density: "comfortable",
@@ -53,6 +53,9 @@ const config = {
 
 test("parseConfig canonicalizes array order and rejects commitlint without husky", () => {
   const parsed = parseConfig(config);
+  const legacy = structuredClone(config);
+  legacy.design.palette = "neutral" as SeedlayerConfig["design"]["palette"];
+  assert.equal(parseConfig(legacy).design.palette, "ink");
   assert.deepEqual(parsed.agents, ["cursor", "claude-code"]);
   assert.deepEqual(parsed.workflow, ["plan", "review"]);
   assert.deepEqual(parsed.quality, ["husky", "commitlint"]);

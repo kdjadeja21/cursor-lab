@@ -274,7 +274,7 @@ function PaletteField({
   return (
     <fieldset>
       <legend className="text-sm font-medium">Palette</legend>
-      <div className="mt-2 grid grid-cols-2 gap-2">
+      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {PALETTES.map((palette) => {
           const tokens = designTokens({ ...value, palette: palette.value });
           const on = value.palette === palette.value;
@@ -283,34 +283,31 @@ function PaletteField({
               key={palette.value}
               type="button"
               aria-pressed={on}
-              className={`overflow-hidden rounded-lg border text-left ${
-                on ? "border-ink ring-1 ring-ink" : "border-line hover:border-ink"
+              className={`flex min-h-32 flex-col justify-between rounded-lg border p-3 text-left ${
+                on ? "ring-2 ring-ink" : ""
               }`}
+              style={{ background: tokens.bg, color: tokens.fg, borderColor: tokens.border }}
               onClick={() => onChange({ ...value, palette: palette.value })}
             >
-              <span
-                className="flex h-20 items-end justify-between p-3"
-                style={{ background: tokens.bg }}
-              >
+              <span className="flex gap-1.5" aria-hidden="true">
                 <span
-                  className="px-2 py-1 text-xs"
-                  style={{
-                    background: tokens.accent,
-                    color: tokens.accentFg,
-                    borderRadius: tokens.radius,
-                  }}
-                >
-                  Aa
-                </span>
-                <span className="flex gap-1" aria-hidden="true">
-                  <span className="size-3 rounded-full" style={{ background: tokens.fg }} />
-                  <span className="size-3 rounded-full" style={{ background: tokens.accent }} />
-                  <span className="size-3 rounded-full" style={{ background: tokens.danger }} />
-                </span>
+                  className="h-7 flex-1"
+                  style={{ background: tokens.accent, borderRadius: tokens.radius }}
+                />
+                <span
+                  className="h-7 flex-1"
+                  style={{ background: tokens.highlight, borderRadius: tokens.radius }}
+                />
+                <span
+                  className="h-7 w-7"
+                  style={{ background: tokens.danger, borderRadius: tokens.radius }}
+                />
               </span>
-              <span className="block bg-paper px-3 py-2">
+              <span>
                 <span className="block text-sm font-medium">{palette.label}</span>
-                <span className="mt-0.5 block text-xs text-muted">{palette.detail}</span>
+                <span className="mt-0.5 block text-xs" style={{ color: tokens.mutedFg }}>
+                  {palette.detail}
+                </span>
               </span>
             </button>
           );

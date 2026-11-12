@@ -28,7 +28,7 @@ This branch is a cursor-lab experiment. `main` stays the starter. The name, lice
 
 - `startup-speed` — agent-safe branches, Biome, Cursor and Claude Code, the full quality gates
 - `team-strict` — GitHub Flow, ESLint, PascalCase components, `Result` errors, 200-line files
-- `hackathon-2h` — trunk-based, vivid tokens, Cursor only, CI without Husky
+- `hackathon-2h` — trunk-based, grove palette, Cursor only, CI without Husky
 
 ## Develop
 

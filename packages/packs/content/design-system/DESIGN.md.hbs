@@ -16,6 +16,7 @@ Do not hardcode hex, rgb, hsl, or okLch values in components, pages, or modules.
 - Secondary text and surfaces: `--color-muted`, `--color-muted-fg`
 - Lines: `--color-border`
 - Primary action: `--color-accent`, `--color-accent-fg`
+- Second color, for chips and supporting actions: `--color-highlight`, `--color-highlight-fg`
 - Errors: `--color-danger`
 - Corners: `--radius`
 - Page padding: `--space-section`
@@ -25,7 +26,7 @@ Dark mode overrides the same variable names. Do not add a second set of one-off 
 ## Components
 
 {{#if flags.shadcn}}
-shadcn components live in `components/ui`. Restyle them with tokens. The shadcn base color in `components.json` is only a starting point; `app/tokens.css` is the source of truth. The vivid palette keeps shadcn's neutral base and layers Seedlayer tokens on top.
+shadcn components live in `components/ui`. Restyle them with tokens. The shadcn base color in `components.json` is only a starting point; `app/tokens.css` is the source of truth.
 {{else}}
 This project does not install shadcn. Style elements with the token classes in `app/globals.css`.
 {{/if}}

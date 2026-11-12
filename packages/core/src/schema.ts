@@ -5,6 +5,22 @@ export const SEEDLAYER_VERSION = "0.1.0";
 export const AGENTS_MD_MAX_LINES = 80;
 
 export const presetIdSchema = z.enum(["startup-speed", "team-strict", "hackathon-2h", "custom"]);
+
+const PALETTE_IDS = ["ink", "harbor", "ember", "iris", "grove", "dusk"] as const;
+
+const LEGACY_PALETTES: Record<string, (typeof PALETTE_IDS)[number]> = {
+  neutral: "ink",
+  slate: "harbor",
+  zinc: "iris",
+  vivid: "grove",
+};
+
+export const paletteSchema = z.preprocess((value) => {
+  if (typeof value === "string" && value in LEGACY_PALETTES) {
+    return LEGACY_PALETTES[value];
+  }
+  return value;
+}, z.enum(PALETTE_IDS));
 export const agentTargetSchema = z.enum(["cursor", "claude-code"]);
 export const workflowCommandSchema = z.enum(["plan", "implement", "review"]);
 export const qualityGateSchema = z.enum(["husky", "commitlint", "ci", "pr-review"]);
@@ -31,7 +47,7 @@ export const seedlayerConfigSchema = z
       .strict(),
     design: z
       .object({
-        palette: z.enum(["neutral", "slate", "zinc", "vivid"]),
+        palette: paletteSchema,
         radius: z.enum(["none", "sm", "md", "lg"]),
         fontSans: z.enum(["Inter", "Geist", "system"]),
         density: z.enum(["compact", "comfortable", "spacious"]),

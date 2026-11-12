@@ -32,6 +32,8 @@ export type DesignTokens = {
   border: string;
   accent: string;
   accentFg: string;
+  highlight: string;
+  highlightFg: string;
   danger: string;
   bgDark: string;
   fgDark: string;
@@ -40,6 +42,8 @@ export type DesignTokens = {
   borderDark: string;
   accentDark: string;
   accentFgDark: string;
+  highlightDark: string;
+  highlightFgDark: string;
   radius: string;
   fontSans: string;
   spaceSection: string;

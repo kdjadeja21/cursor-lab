@@ -20,7 +20,7 @@ export const PRESET_COPY: Record<
   },
   "hackathon-2h": {
     label: "Hackathon",
-    detail: "Trunk-based, vivid tokens, Cursor only, CI.",
+    detail: "Trunk-based, grove palette, Cursor only, CI.",
   },
 };
 
@@ -64,10 +64,12 @@ export function isSection(value: string | undefined): value is SectionId {
 }
 
 export const PALETTES: Choice<SeedlayerConfig["design"]["palette"]>[] = [
-  { value: "neutral", label: "Neutral", detail: "Black accent on a gray page." },
-  { value: "slate", label: "Slate", detail: "Cool ink, blue-gray borders." },
-  { value: "zinc", label: "Zinc", detail: "Neutral with a slightly cool gray." },
-  { value: "vivid", label: "Vivid", detail: "Green accent for a louder first screen." },
+  { value: "ink", label: "Ink", detail: "Warm paper, copper and amber." },
+  { value: "harbor", label: "Harbor", detail: "Mist page, cobalt and teal." },
+  { value: "ember", label: "Ember", detail: "Cream page, rose and orange." },
+  { value: "iris", label: "Iris", detail: "Lilac page, violet and pink." },
+  { value: "grove", label: "Grove", detail: "Sage page, emerald and gold." },
+  { value: "dusk", label: "Dusk", detail: "Blush page, wine and violet." },
 ];
 
 export const RADII: Choice<SeedlayerConfig["design"]["radius"]>[] = [

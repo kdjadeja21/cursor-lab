@@ -43,10 +43,24 @@ export function DesignLook({
               Primary
             </span>
             <span
-              className="border px-3 py-2 text-sm"
-              style={{ borderColor: tokens.border, borderRadius: tokens.radius }}
+              className="px-3 py-2 text-sm"
+              style={{
+                background: tokens.highlight,
+                color: tokens.highlightFg,
+                borderRadius: tokens.radius,
+              }}
             >
-              Secondary
+              Highlight
+            </span>
+            <span
+              className="border px-3 py-2 text-sm"
+              style={{
+                borderColor: tokens.border,
+                background: tokens.muted,
+                borderRadius: tokens.radius,
+              }}
+            >
+              Surface
             </span>
           </div>
         </div>
@@ -55,7 +69,17 @@ export function DesignLook({
           style={{ background: tokens.bgDark, color: tokens.fgDark }}
         >
           <span>--accent</span>
-          <span style={{ color: tokens.accentDark }}>{tokens.accent}</span>
+          <span className="flex items-center gap-2">
+            <span
+              className="inline-block size-3 rounded-full"
+              style={{ background: tokens.accentDark }}
+            />
+            <span
+              className="inline-block size-3 rounded-full"
+              style={{ background: tokens.highlightDark }}
+            />
+            <span style={{ color: tokens.accentDark }}>{tokens.accent}</span>
+          </span>
         </div>
       </article>
     </div>

@@ -12,7 +12,7 @@
     "hosting": "vercel"
   },
   "design": {
-    "palette": "slate",
+    "palette": "harbor",
     "radius": "sm",
     "fontSans": "Geist",
     "density": "compact"

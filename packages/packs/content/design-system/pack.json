@@ -4,7 +4,7 @@
   "requires": [],
   "conflicts": [],
   "options": {
-    "palette": { "type": "string", "default": "neutral", "from": "design.palette" },
+    "palette": { "type": "string", "default": "ink", "from": "design.palette" },
     "radius": { "type": "string", "default": "md", "from": "design.radius" }
   },
   "outputs": [
