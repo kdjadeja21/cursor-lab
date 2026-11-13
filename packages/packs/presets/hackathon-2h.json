@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "preset": "hackathon-2h",
+  "stack": {
+    "framework": "nextjs",
+    "language": "typescript",
+    "styling": "tailwind",
+    "components": "shadcn",
+    "tests": "vitest",
+    "database": "none",
+    "auth": "none",
+    "hosting": "vercel"
+  },
+  "design": {
+    "palette": "grove",
+    "radius": "lg",
+    "fontSans": "Geist",
+    "density": "comfortable"
+  },
+  "codeStyle": {
+    "linter": "biome",
+    "strictness": "relaxed",
+    "maxFileLines": 500,
+    "folders": "feature",
+    "naming": "kebab-files",
+    "errorHandling": "throw"
+  },
+  "git": {
+    "workflow": "trunk",
+    "branchPrefix": "wip/",
+    "commits": "conventional",
+    "maxPrLines": 800
+  },
+  "agents": ["cursor"],
+  "workflow": ["implement"],
+  "quality": ["ci"]
+}

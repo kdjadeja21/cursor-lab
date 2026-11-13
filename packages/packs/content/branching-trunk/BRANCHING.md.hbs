@@ -1,0 +1,20 @@
+<!-- seedlayer:begin branching -->
+# Branching
+
+Workflow: trunk-based.
+
+## Branches
+
+- `main` is always releasable.
+- Short-lived branches use `{{config.git.branchPrefix}}` and should merge the same day.
+- Prefer a small pull request over a long-lived branch.
+
+## Pull requests
+
+- Cap the diff at {{config.git.maxPrLines}} lines, excluding lockfiles.
+- Merge after CI is green. Ask for review when the change is risky, not on every line by default.
+
+## Commits
+
+Use Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`.
+<!-- seedlayer:end branching -->

@@ -1,0 +1,34 @@
+# Code style
+
+Linter `{{config.codeStyle.linter}}`, strictness `{{config.codeStyle.strictness}}`, file cap {{config.codeStyle.maxFileLines}} lines.
+
+TypeScript `strict` is always on. Strictness changes the linter and the review bar, not the compiler.
+
+## Files
+
+- Keep each file at or under {{config.codeStyle.maxFileLines}} lines. `scripts/check-file-size.mjs` enforces this.
+- {{#if flags.featureFolders}}New product code goes under `features/<name>/`. Shared UI stays in `components/`.{{else}}Group by type: `components/`, `hooks/`, `lib/`, and `types/`.{{/if}}
+- {{#if (eq config.codeStyle.naming "kebab-files")}}File names are kebab-case, including components (`button.tsx`).{{else}}Component files are PascalCase (`Button.tsx`). Other modules stay kebab-case.{{/if}}
+
+## Errors
+
+{{#if flags.result}}
+Return `Result<T, E>` from `lib/result.ts` for expected failures. Reserve thrown errors for programmer mistakes.
+{{else}}
+Throw an `Error` with a specific message for expected failures. Do not return a null sentinel.
+{{/if}}
+
+## Types
+
+- Do not use `any`. Use `unknown` and narrow it.
+- In a `switch` over a union or enum, assign the leftover value to `never` in the default arm.
+- Put imports at the top of the file.
+
+## Checks
+
+{{#if flags.biome}}
+`npm run lint` runs Biome and the file-size script.
+{{else}}
+`npm run lint` runs ESLint and the file-size script.
+{{/if}}
+`npm run typecheck` runs `tsc --noEmit`.

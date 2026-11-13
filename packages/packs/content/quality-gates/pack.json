@@ -1,0 +1,14 @@
+{
+  "name": "quality-gates",
+  "version": "0.1.0",
+  "requires": [],
+  "conflicts": [],
+  "options": {},
+  "outputs": [
+    { "template": "pre-commit.hbs", "to": ".husky/pre-commit", "when": "quality:husky" },
+    { "template": "commit-msg.hbs", "to": ".husky/commit-msg", "when": "quality:commitlint" },
+    { "template": "commitlint.config.js.hbs", "to": "commitlint.config.js", "when": "quality:commitlint" },
+    { "template": "ci.yml.hbs", "to": ".github/workflows/ci.yml", "when": "quality:ci" }
+  ],
+  "agentRules": ["quality"]
+}

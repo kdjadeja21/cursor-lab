@@ -1,0 +1,15 @@
+{
+  "name": "branching-github-flow",
+  "version": "0.1.0",
+  "requires": [],
+  "conflicts": ["branching-trunk", "branching-agent-safe"],
+  "options": {
+    "branchPrefix": { "type": "string", "default": "feature/", "from": "git.branchPrefix" },
+    "maxPrLines": { "type": "number", "default": 300, "from": "git.maxPrLines" }
+  },
+  "outputs": [
+    { "template": "BRANCHING.md.hbs", "to": "BRANCHING.md" },
+    { "template": "pull_request_template.md.hbs", "to": ".github/pull_request_template.md" }
+  ],
+  "agentRules": ["branching"]
+}

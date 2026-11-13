@@ -1,0 +1,11 @@
+name: Request an agent target
+description: Ask for another agent host such as Codex or Copilot.
+title: "agent: "
+labels: ["agent"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: Which agent, and which files does it read?
+    validations:
+      required: true

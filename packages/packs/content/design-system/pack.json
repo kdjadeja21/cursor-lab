@@ -1,0 +1,15 @@
+{
+  "name": "design-system",
+  "version": "0.1.0",
+  "requires": [],
+  "conflicts": [],
+  "options": {
+    "palette": { "type": "string", "default": "ink", "from": "design.palette" },
+    "radius": { "type": "string", "default": "md", "from": "design.radius" }
+  },
+  "outputs": [
+    { "template": "DESIGN.md.hbs", "to": "DESIGN.md" },
+    { "template": "tokens.css.hbs", "to": "app/tokens.css" }
+  ],
+  "agentRules": ["design"]
+}

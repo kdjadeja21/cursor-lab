@@ -1,0 +1,21 @@
+<!-- seedlayer:begin branching -->
+# Branching
+
+Workflow: agent-safe.
+
+## Branches
+
+- Create `{{config.git.branchPrefix}}<ticket>` from `main`. Example: `{{config.git.branchPrefix}}128-login`.
+- Use a separate git worktree per branch so two agents never share a working tree.
+- Do not commit or push on `main`.
+
+## Pull requests
+
+- Cap the diff at {{config.git.maxPrLines}} lines, excluding lockfiles.
+- A human reviews and merges. Agents do not merge their own pull requests.
+- One concern per pull request.
+
+## Commits
+
+Use Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`.
+<!-- seedlayer:end branching -->
