@@ -4,7 +4,9 @@ A shared [Next.js](https://nextjs.org) sandbox for **Cursor-driven experiments**
 
 ## Daily routine
 
-The home page is fully static. It renders `content/daily.ts` and nothing else — no fetch, no revalidate, no clock. To publish a new day, edit `content/daily.ts`, then:
+The home page is fully static. It renders `content/daily.ts` and nothing else — no fetch, no revalidate, no clock.
+
+Edit `content/daily.ts` on your own machine and commit it with your own git identity. Do not publish the daily update through a cloud agent: that commit is authored by the agent, with you only as co-author, and it will not count as yours on a streak.
 
 ```bash
 git commit -am "daily: $(date +%F)" && git push

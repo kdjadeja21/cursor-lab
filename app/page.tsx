@@ -31,7 +31,7 @@ export default function Home() {
       <main className="flex w-full max-w-[560px] flex-col gap-6">
         <header>
           <h1 className="text-lg font-semibold tracking-tight">
-            Daily · Krushnasinh
+            Daily
           </h1>
         </header>
 

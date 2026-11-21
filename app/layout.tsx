@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Daily · Krushnasinh",
+  title: "Daily",
   description: "A static daily note: one tip and one model pick.",
 };
 

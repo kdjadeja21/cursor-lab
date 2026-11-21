@@ -10,10 +10,10 @@ type Daily = {
 
 export const daily: Daily = {
   updated: "2026-11-21T11:35:00+05:30",
-  tip: "Change this file, then commit. The page is that commit — it will not refresh itself.",
+  tip: "Thinking tokens are billed as output. A long chain of thought can cost more than the reply.",
   model: {
-    name: "Claude Sonnet",
-    price: "$3 / MTok in · $15 / MTok out",
-    why: "A steady default for a small daily edit.",
+    name: "Gemini 4 Neon",
+    price: "$3 / $15",
+    why: "near-Carbon quality at Flash speed.",
   },
 };
