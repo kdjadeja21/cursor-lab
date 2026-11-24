@@ -9,11 +9,11 @@ type Daily = {
 };
 
 export const daily: Daily = {
-  updated: "2026-11-23T14:48:00+05:30",
-  tip: "In Cursor, scope the chat with @folder so context is not spent on files you will not change.",
+  updated: "2026-11-24T12:42:00+05:30",
+  tip: "Use @Git in Cursor to ground the chat in your diff instead of pasting hunks by hand.",
   model: {
     name: "Gemini 4 Hydrogen",
     price: "$1.50 / $7.50",
-    why: "Already under Carbon's intro rate, and this price holds past Dec 1.",
+    why: "Free tier plus paid rate unchanged — best Gemini 4 bang per token today.",
   },
 };
