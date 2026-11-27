@@ -2,6 +2,16 @@
 
 A shared [Next.js](https://nextjs.org) sandbox for **Cursor-driven experiments**: UI prototypes, marketing landings, agent-panel studies, and tooling spikes. **`main` is the neutral baseline**—the default create-next-app starter—not a shipping product. Each idea lives on its own branch (usually with an open PR).
 
+## Daily routine
+
+The home page is fully static. It renders `content/daily.ts` and nothing else — no fetch, no revalidate, no clock.
+
+Edit `content/daily.ts` on your own machine and commit it with your own git identity. Do not publish the daily update through a cloud agent: that commit is authored by the agent, with you only as co-author, and it will not count as yours on a streak.
+
+```bash
+git commit -am "daily: $(date +%F)" && git push
+```
+
 ## How this lab is used
 
 1. **Branch** from `main`, or from another experiment branch when you want a stacked base. Name branches `cursor/<short-description>-<suffix>` (for example `cursor/harbor-landing-page-2ea0`).
@@ -75,6 +85,8 @@ Experiment branches often add shadcn/ui, extra routes, tests, or `.cursor/` conf
 
 ```text
 app/                 # App Router layout and pages (entry: app/page.tsx)
+components/          # StaleBadge (client); the rest of the page is a Server Component
+content/daily.ts     # The only file to edit for a new day
 public/              # Static assets
 next.config.ts
 postcss.config.mjs
