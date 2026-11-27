@@ -9,11 +9,11 @@ type Daily = {
 };
 
 export const daily: Daily = {
-  updated: "2026-11-25T10:38:00+05:30",
-  tip: "In Agent mode, name the acceptance check in the prompt so the model verifies before it stops.",
+  updated: "2026-11-27T22:22:00+05:30",
+  tip: "Pin your build or lint command in .cursor/rules so every Agent run uses the same verification steps.",
   model: {
     name: "Gemini 4 Hydrogen",
     price: "$1.50 / $7.50",
-    why: "Unchanged rate; only Gemini 4 model on Google's page with both free and paid tiers.",
+    why: "Still $1.50/$7.50; Carbon jumps Dec 1, but Hydrogen holds this rate.",
   },
 };
